@@ -174,9 +174,9 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
     <button onclick="showTab('transacciones',this)">💳 Transacciones</button>
     <button onclick="showTab('empresas',this)">🏢 Empresas</button>
     <button onclick="showTab('graficos',this)">📈 Gráficos</button>
+    <button onclick="showTab('revision',this)">✅ Revisión</button>
     <button onclick="showTab('presupuesto',this)">📋 Presupuesto</button>
     <button onclick="showTab('metas',this)">🎯 Metas</button>
-    <button onclick="showTab('revision',this)">✅ Revisión</button>
     <button onclick="showTab('respaldo',this)">💾 Respaldo</button>
   </nav>
 </header>
@@ -2589,13 +2589,13 @@ function initRevisionFiltros(){
 
   // Descripción 1
   const descs1=[...new Set(TXS.map(t=>t.desc).filter(Boolean))].sort();
-  const selDesc1=document.getElementById('rev-desc1-input');
-  if(selDesc1){const prev=selDesc1.value;selDesc1.innerHTML='<option value="">Todas</option>'+descs1.map(d=>`<option value="${d}"${d===prev?' selected':''}>${d}</option>`).join('');}
+  const selD1=document.getElementById('rev-desc1-input');
+  if(selD1){const prev=selD1.value;selD1.innerHTML='<option value="">Todas</option>'+descs1.map(d=>`<option value="${d}"${d===prev?' selected':''}>${d}</option>`).join('');}
 
   // Descripción 2
   const descs2=[...new Set(TXS.map(t=>t.desc2).filter(Boolean))].sort();
-  const selDesc2=document.getElementById('rev-desc2-input');
-  if(selDesc2){const prev=selDesc2.value;selDesc2.innerHTML='<option value="">Todas</option>'+descs2.map(d=>`<option value="${d}"${d===prev?' selected':''}>${d}</option>`).join('');}
+  const selD2=document.getElementById('rev-desc2-input');
+  if(selD2){const prev=selD2.value;selD2.innerHTML='<option value="">Todas</option>'+descs2.map(d=>`<option value="${d}"${d===prev?' selected':''}>${d}</option>`).join('');}
 }
 
 let revEditId=null;
