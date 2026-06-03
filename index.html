@@ -468,6 +468,38 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
         </select>
       </div>
     </div>
+    <!-- Fila 2: filtros por texto -->
+    <div class="g3" style="margin-top:.6rem;gap:.6rem">
+      <div>
+        <label>Categoría</label>
+        <select id="graf-cat" onchange="renderGraficos()">
+          <option value="">Todas</option>
+        </select>
+      </div>
+      <div>
+        <label>🔍 Descripción 1</label>
+        <div style="position:relative">
+          <input type="text" id="graf-desc1-input" placeholder="Buscar..." autocomplete="off"
+            oninput="filterGrafDesc1(this.value)" onfocus="filterGrafDesc1(this.value)"
+            onblur="setTimeout(()=>document.getElementById('graf-desc1-drop').style.display='none',180)"
+            style="font-size:.82rem;padding:.35rem .65rem"/>
+          <div id="graf-desc1-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:.55rem;margin-top:.15rem;z-index:300;box-shadow:0 4px 12px rgba(234,88,12,.12);max-height:180px;overflow-y:auto"></div>
+        </div>
+        <input type="hidden" id="graf-desc1"/>
+      </div>
+      <div>
+        <label>📝 Descripción 2</label>
+        <div style="position:relative">
+          <input type="text" id="graf-desc2-input" placeholder="Buscar..." autocomplete="off"
+            oninput="filterGrafDesc2(this.value)" onfocus="filterGrafDesc2(this.value)"
+            onblur="setTimeout(()=>document.getElementById('graf-desc2-drop').style.display='none',180)"
+            style="font-size:.82rem;padding:.35rem .65rem"/>
+          <div id="graf-desc2-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:.55rem;margin-top:.15rem;z-index:300;box-shadow:0 4px 12px rgba(234,88,12,.12);max-height:180px;overflow-y:auto"></div>
+        </div>
+        <input type="hidden" id="graf-desc2"/>
+      </div>
+    </div>
+    <div style="margin-top:.4rem;display:flex;gap:.4rem;flex-wrap:wrap" id="graf-tags"></div>
   </div>
   <div class="card"><h2 id="pie-title">Gastos por categoría</h2><div id="pie-chart-wrap"></div></div>
   <div class="card"><h2 id="bar-title">Ingresos vs Gastos</h2><div id="bar-chart-wrap"></div></div>
@@ -533,10 +565,31 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
         </select>
       </div>
     </div>
-    <div style="margin-top:.6rem;display:flex;align-items:center;gap:.5rem">
-      <label style="margin:0;white-space:nowrap">📝 Descripción 2</label>
-      <input type="text" id="rev-desc2" placeholder="Buscar en descripción 2..." oninput="renderRevision()" style="flex:1;font-size:.82rem;padding:.35rem .65rem"/>
+    <div class="g2" style="margin-top:.6rem;gap:.6rem">
+      <div>
+        <label>🔍 Descripción 1</label>
+        <div style="position:relative">
+          <input type="text" id="rev-desc1-input" placeholder="Buscar o seleccionar..." autocomplete="off"
+            oninput="filterRevDesc1(this.value)" onfocus="filterRevDesc1(this.value)"
+            onblur="setTimeout(()=>document.getElementById('rev-desc1-drop').style.display='none',180)"
+            style="font-size:.82rem;padding:.35rem .65rem"/>
+          <div id="rev-desc1-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:.55rem;margin-top:.15rem;z-index:300;box-shadow:0 4px 12px rgba(234,88,12,.12);max-height:180px;overflow-y:auto"></div>
+        </div>
+        <input type="hidden" id="rev-desc1"/>
+      </div>
+      <div>
+        <label>📝 Descripción 2</label>
+        <div style="position:relative">
+          <input type="text" id="rev-desc2-input" placeholder="Buscar o seleccionar..." autocomplete="off"
+            oninput="filterRevDesc2(this.value)" onfocus="filterRevDesc2(this.value)"
+            onblur="setTimeout(()=>document.getElementById('rev-desc2-drop').style.display='none',180)"
+            style="font-size:.82rem;padding:.35rem .65rem"/>
+          <div id="rev-desc2-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:.55rem;margin-top:.15rem;z-index:300;box-shadow:0 4px 12px rgba(234,88,12,.12);max-height:180px;overflow-y:auto"></div>
+        </div>
+        <input type="hidden" id="rev-desc2"/>
+      </div>
     </div>
+    <div style="margin-top:.5rem;display:flex;gap:.4rem;flex-wrap:wrap" id="rev-tags"></div>
   </div>
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem">
@@ -1484,20 +1537,22 @@ function renderDashboard(){
  
 // ─── Gráficos ────────────────────────────────────────────────────────────────
 function renderGraficos(){
-  // Poblar select de cuentas si está vacío
+  // Poblar select de cuentas
   const grafAcc=document.getElementById('graf-acc');
   if(grafAcc&&grafAcc.options.length<=1){
-    ACCS.forEach(a=>{
-      const o=document.createElement('option');
-      o.value=a.id;o.textContent=a.nombre;grafAcc.appendChild(o);
-    });
+    ACCS.forEach(a=>{const o=document.createElement('option');o.value=a.id;o.textContent=a.nombre;grafAcc.appendChild(o);});
   }
+  initGrafCatSelect();
+  updateGrafTags();
  
   // Leer filtros
-  const fOrg  = document.getElementById('graf-org')?.value||'todas';
-  const fAcc  = document.getElementById('graf-acc')?.value||'todas';
-  const fMeses= parseInt(document.getElementById('graf-meses')?.value||'6');
-  const fTipo = document.getElementById('graf-tipo')?.value||'todos';
+  const fOrg   = document.getElementById('graf-org')?.value||'todas';
+  const fAcc   = document.getElementById('graf-acc')?.value||'todas';
+  const fMeses = parseInt(document.getElementById('graf-meses')?.value||'6');
+  const fTipo  = document.getElementById('graf-tipo')?.value||'todos';
+  const fCat   = document.getElementById('graf-cat')?.value||'';
+  const fGDesc1= document.getElementById('graf-desc1')?.value||'';
+  const fGDesc2= document.getElementById('graf-desc2')?.value||'';
  
   // Función de filtro base
   const now=new Date();
@@ -1513,6 +1568,9 @@ function renderGraficos(){
       if(fTipo==='gasto'&&t.tipo!=='gasto') return false;
       if(fTipo==='ingreso'&&t.tipo!=='ingreso') return false;
       if(fTipo==='inversion'&&!t.tipo.startsWith('inversion_')) return false;
+      if(fCat&&t.cat!==fCat) return false;
+      if(fGDesc1&&!(t.desc||'').toLowerCase().includes(fGDesc1.toLowerCase())) return false;
+      if(fGDesc2&&!(t.desc2||'').toLowerCase().includes(fGDesc2.toLowerCase())) return false;
       return true;
     });
   }
@@ -2425,6 +2483,106 @@ function shake(id){const el=document.getElementById(id);el.style.borderColor='va
  
 // ─── Render all ──────────────────────────────────────────────────────────────
 // ─── Revisión ────────────────────────────────────────────────────────────────
+// ─── Dropdowns descripción en Revisión ───────────────────────────────────────
+// ─── Dropdowns descripción en Gráficos ───────────────────────────────────────
+function filterGrafDesc1(q){
+  const vals=[...new Set(TXS.map(t=>t.desc).filter(Boolean))].sort();
+  makeGrafDrop('graf-desc1-drop','graf-desc1','graf-desc1-input',vals,q);
+  if(!q){document.getElementById('graf-desc1').value='';updateGrafTags();renderGraficos();}
+}
+function filterGrafDesc2(q){
+  const vals=[...new Set(TXS.map(t=>t.desc2).filter(Boolean))].sort();
+  makeGrafDrop('graf-desc2-drop','graf-desc2','graf-desc2-input',vals,q);
+  if(!q){document.getElementById('graf-desc2').value='';updateGrafTags();renderGraficos();}
+}
+function makeGrafDrop(dropId,hiddenId,inputId,values,query){
+  const drop=document.getElementById(dropId);if(!drop)return;
+  const q=query.toLowerCase();
+  const matches=values.filter(v=>v&&v.toLowerCase().includes(q)).slice(0,20);
+  if(!matches.length){drop.style.display='none';return;}
+  drop.innerHTML=matches.map(v=>`<div style="padding:.45rem .8rem;cursor:pointer;font-size:.82rem;color:var(--text);border-bottom:1px solid var(--border-light)"
+    onmousedown="selectGrafDesc('${dropId}','${hiddenId}','${inputId}',${JSON.stringify(v)})">${v}</div>`).join('');
+  drop.style.display='block';
+}
+function selectGrafDesc(dropId,hiddenId,inputId,val){
+  document.getElementById(hiddenId).value=val;
+  document.getElementById(inputId).value=val;
+  document.getElementById(dropId).style.display='none';
+  updateGrafTags();renderGraficos();
+}
+function updateGrafTags(){
+  const tags=document.getElementById('graf-tags');if(!tags)return;
+  const d1=document.getElementById('graf-desc1')?.value;
+  const d2=document.getElementById('graf-desc2')?.value;
+  const cat=document.getElementById('graf-cat')?.value;
+  tags.innerHTML=[
+    cat?`<span style="font-size:.72rem;background:var(--primary-pale);color:var(--primary-dark);padding:.18rem .6rem;border-radius:9999px;font-weight:600;cursor:pointer" onclick="document.getElementById('graf-cat').value='';updateGrafTags();renderGraficos()">📋 ${cat} ✕</span>`:'',
+    d1?`<span style="font-size:.72rem;background:var(--primary-pale);color:var(--primary-dark);padding:.18rem .6rem;border-radius:9999px;font-weight:600;cursor:pointer" onclick="clearGrafDesc('graf-desc1','graf-desc1-input')">🔍 ${d1} ✕</span>`:'',
+    d2?`<span style="font-size:.72rem;background:var(--primary-pale);color:var(--primary-dark);padding:.18rem .6rem;border-radius:9999px;font-weight:600;cursor:pointer" onclick="clearGrafDesc('graf-desc2','graf-desc2-input')">📝 ${d2} ✕</span>`:'',
+  ].join('');
+}
+function clearGrafDesc(hiddenId,inputId){
+  document.getElementById(hiddenId).value='';
+  document.getElementById(inputId).value='';
+  updateGrafTags();renderGraficos();
+}
+function initGrafCatSelect(){
+  const sel=document.getElementById('graf-cat');if(!sel)return;
+  const prev=sel.value||'';
+  const cats=[...new Set(TXS.map(t=>t.cat).filter(Boolean))].sort();
+  sel.innerHTML='<option value="">Todas</option>'+cats.map(c=>`<option${c===prev?' selected':''}>${c}</option>`).join('');
+}
+ 
+function makeRevDrop(dropId, hiddenId, inputId, values, query){
+  const drop=document.getElementById(dropId);
+  if(!drop)return;
+  const q=query.toLowerCase();
+  const matches=values.filter(v=>v&&v.toLowerCase().includes(q)).slice(0,20);
+  if(!matches.length){drop.style.display='none';return;}
+  drop.innerHTML=matches.map(v=>`
+    <div style="padding:.45rem .8rem;cursor:pointer;font-size:.82rem;color:var(--text);border-bottom:1px solid var(--border-light)"
+      onmousedown="selectRevDesc('${dropId}','${hiddenId}','${inputId}',${JSON.stringify(v)})">
+      ${v}
+    </div>`).join('');
+  drop.style.display='block';
+}
+ 
+function selectRevDesc(dropId, hiddenId, inputId, val){
+  document.getElementById(hiddenId).value=val;
+  document.getElementById(inputId).value=val;
+  document.getElementById(dropId).style.display='none';
+  updateRevTags();
+  renderRevision();
+}
+ 
+function filterRevDesc1(q){
+  const vals=[...new Set(TXS.map(t=>t.desc).filter(Boolean))].sort();
+  makeRevDrop('rev-desc1-drop','rev-desc1','rev-desc1-input',vals,q);
+  if(!q){document.getElementById('rev-desc1').value='';updateRevTags();renderRevision();}
+}
+function filterRevDesc2(q){
+  const vals=[...new Set(TXS.map(t=>t.desc2).filter(Boolean))].sort();
+  makeRevDrop('rev-desc2-drop','rev-desc2','rev-desc2-input',vals,q);
+  if(!q){document.getElementById('rev-desc2').value='';updateRevTags();renderRevision();}
+}
+ 
+function updateRevTags(){
+  const tags=document.getElementById('rev-tags');
+  if(!tags)return;
+  const d1=document.getElementById('rev-desc1')?.value;
+  const d2=document.getElementById('rev-desc2')?.value;
+  tags.innerHTML=[
+    d1?`<span style="font-size:.72rem;background:var(--primary-pale);color:var(--primary-dark);padding:.18rem .6rem;border-radius:9999px;font-weight:600;cursor:pointer" onclick="clearRevDesc('rev-desc1','rev-desc1-input')">🔍 ${d1} ✕</span>`:'',
+    d2?`<span style="font-size:.72rem;background:var(--primary-pale);color:var(--primary-dark);padding:.18rem .6rem;border-radius:9999px;font-weight:600;cursor:pointer" onclick="clearRevDesc('rev-desc2','rev-desc2-input')">📝 ${d2} ✕</span>`:'',
+  ].join('');
+}
+function clearRevDesc(hiddenId, inputId){
+  document.getElementById(hiddenId).value='';
+  document.getElementById(inputId).value='';
+  updateRevTags();
+  renderRevision();
+}
+ 
 function initRevisionFiltros(){
   // Guardar valores actuales antes de reconstruir
   const prevMes  = document.getElementById('rev-mes')?.value||'';
@@ -2493,6 +2651,7 @@ function renderRevision(){
   const fAcc=document.getElementById('rev-acc')?.value||'';
   const fCat=document.getElementById('rev-cat')?.value||'';
   const fEst=document.getElementById('rev-estado')?.value||'';
+  const fDesc1=(document.getElementById('rev-desc1')?.value||'').toLowerCase().trim();
   const fDesc2=(document.getElementById('rev-desc2')?.value||'').toLowerCase().trim();
  
   let txs=[...TXS].filter(t=>t.tipo==='gasto'||t.tipo==='ingreso'||t.tipo.startsWith('inversion_'));
@@ -2501,6 +2660,7 @@ function renderRevision(){
   if(fCat) txs=txs.filter(t=>t.cat===fCat);
   if(fEst==='pendiente') txs=txs.filter(t=>!REVISIONES[t.id]);
   if(fEst==='revisado') txs=txs.filter(t=>!!REVISIONES[t.id]);
+  if(fDesc1) txs=txs.filter(t=>(t.desc||'').toLowerCase().includes(fDesc1));
   if(fDesc2) txs=txs.filter(t=>(t.desc2||'').toLowerCase().includes(fDesc2));
  
   // Ordenar por fecha más reciente primero
