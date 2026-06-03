@@ -2488,12 +2488,14 @@ function shake(id){const el=document.getElementById(id);el.style.borderColor='va
 function filterGrafDesc1(q){
   const vals=[...new Set(TXS.map(t=>t.desc).filter(Boolean))].sort();
   makeGrafDrop('graf-desc1-drop','graf-desc1','graf-desc1-input',vals,q);
-  if(!q){document.getElementById('graf-desc1').value='';updateGrafTags();renderGraficos();}
+  document.getElementById('graf-desc1').value=q;
+  updateGrafTags(); renderGraficos();
 }
 function filterGrafDesc2(q){
   const vals=[...new Set(TXS.map(t=>t.desc2).filter(Boolean))].sort();
   makeGrafDrop('graf-desc2-drop','graf-desc2','graf-desc2-input',vals,q);
-  if(!q){document.getElementById('graf-desc2').value='';updateGrafTags();renderGraficos();}
+  document.getElementById('graf-desc2').value=q;
+  updateGrafTags(); renderGraficos();
 }
 function makeGrafDrop(dropId,hiddenId,inputId,values,query){
   const drop=document.getElementById(dropId);if(!drop)return;
@@ -2558,12 +2560,14 @@ function selectRevDesc(dropId, hiddenId, inputId, val){
 function filterRevDesc1(q){
   const vals=[...new Set(TXS.map(t=>t.desc).filter(Boolean))].sort();
   makeRevDrop('rev-desc1-drop','rev-desc1','rev-desc1-input',vals,q);
-  if(!q){document.getElementById('rev-desc1').value='';updateRevTags();renderRevision();}
+  document.getElementById('rev-desc1').value=q;
+  updateRevTags(); renderRevision();
 }
 function filterRevDesc2(q){
   const vals=[...new Set(TXS.map(t=>t.desc2).filter(Boolean))].sort();
   makeRevDrop('rev-desc2-drop','rev-desc2','rev-desc2-input',vals,q);
-  if(!q){document.getElementById('rev-desc2').value='';updateRevTags();renderRevision();}
+  document.getElementById('rev-desc2').value=q;
+  updateRevTags(); renderRevision();
 }
  
 function updateRevTags(){
@@ -2635,8 +2639,8 @@ function renderRevision(){
   const fCat  = document.getElementById('rev-cat')?.value||'';
   const fEst  = document.getElementById('rev-estado')?.value||'';
   // Desc: leer del input visible (funciona tanto si escribe como si selecciona del dropdown)
-  const fDesc1=(document.getElementById('rev-desc1-input')?.value||'').toLowerCase().trim();
-  const fDesc2=(document.getElementById('rev-desc2-input')?.value||'').toLowerCase().trim();
+  const fDesc1=(document.getElementById('rev-desc1')?.value||'').toLowerCase().trim();
+  const fDesc2=(document.getElementById('rev-desc2')?.value||'').toLowerCase().trim();
  
   // Reconstruir opciones de selectores preservando selección
   initRevisionFiltros();
@@ -2779,3 +2783,4 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
+ 
