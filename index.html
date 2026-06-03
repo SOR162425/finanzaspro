@@ -1356,9 +1356,23 @@ function renderDashboard(){
   const invResc=TXS.filter(t=>t.tipo==='inversion_rescate').reduce((s,t)=>s+t.monto,0);
   const invNeto=invDep-invResc;
   // Por instrumento/categoría
-  const invPorCat={};
-  TXS.filter(t=>t.tipo==='inversion_deposito').forEach(t=>{invPorCat[t.cat]=(invPorCat[t.cat]||0)+t.monto;});
-  TXS.filter(t=>t.tipo==='inversion_rescate').forEach(t=>{invPorCat[t.cat.replace('Rescate ','')]=(invPorCat[t.cat.replace('Rescate ','')]||0)-t.monto;});
+  // Agrupar por categoría y dentro de cada categoría por descripción
+  const invPorCat={};   // {cat: total}
+  const invDetalle={};  // {cat: {desc: total}}
+  TXS.filter(t=>t.tipo==='inversion_deposito').forEach(t=>{
+    invPorCat[t.cat]=(invPorCat[t.cat]||0)+t.monto;
+    if(!invDetalle[t.cat]) invDetalle[t.cat]={};
+    const key=t.desc||'Sin descripción';
+    invDetalle[t.cat][key]=(invDetalle[t.cat][key]||0)+t.monto;
+  });
+  TXS.filter(t=>t.tipo==='inversion_rescate').forEach(t=>{
+    const cat=t.cat.replace('Rescate ','');
+    invPorCat[cat]=(invPorCat[cat]||0)-t.monto;
+    if(invDetalle[cat]){
+      const key=t.desc||'Sin descripción';
+      invDetalle[cat][key]=(invDetalle[cat][key]||0)-t.monto;
+    }
+  });
   const dineroDispo=totalBalance; // saldo en cuentas (ya descuenta inversiones depositadas)
 
   document.getElementById('stats-grid').innerHTML=[
@@ -1374,12 +1388,27 @@ function renderDashboard(){
   </div>`).join('');
 
   // Sección inversiones dashboard
-  const invCatHtml=Object.entries(invPorCat).filter(([,v])=>v>0).map(([c,v])=>
-    `<div style="display:flex;justify-content:space-between;font-size:.78rem;padding:.3rem 0;border-bottom:1px solid var(--border-light)">
-      <span style="color:var(--text-muted)">📈 ${c}</span>
-      <span style="font-weight:700;color:#7c3aed">${fmt(v)}</span>
-    </div>`
-  ).join('');
+  const invCatHtml=Object.entries(invPorCat).filter(([,v])=>v>0).map(([c,v])=>{
+    // Detalles por descripción dentro de esta categoría
+    const detalles=invDetalle[c]||{};
+    const detalleEntries=Object.entries(detalles).filter(([,dv])=>dv>0);
+    const tieneDetalles=detalleEntries.length>1||(detalleEntries.length===1&&detalleEntries[0][0]!=='Sin descripción');
+    const detalleHtml=tieneDetalles
+      ? detalleEntries.filter(([,dv])=>dv>0).map(([desc,dv])=>
+          `<div style="display:flex;justify-content:space-between;font-size:.72rem;padding:.15rem 0 .15rem 1rem;color:var(--text-muted)">
+            <span>↳ ${desc}</span>
+            <span style="font-weight:600;color:#7c3aed">${fmt(dv)}</span>
+          </div>`
+        ).join('')
+      : '';
+    return `<div style="border-bottom:1px solid var(--border-light);padding:.3rem 0">
+      <div style="display:flex;justify-content:space-between;font-size:.78rem">
+        <span style="color:var(--text-muted);font-weight:600">📈 ${c}</span>
+        <span style="font-weight:700;color:#7c3aed">${fmt(v)}</span>
+      </div>
+      ${detalleHtml}
+    </div>`;
+  }).join('');
   const invSection=document.getElementById('dash-inv-section');
   if(invSection) invSection.innerHTML=invNeto>0?`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
