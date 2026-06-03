@@ -2488,14 +2488,12 @@ function shake(id){const el=document.getElementById(id);el.style.borderColor='va
 function filterGrafDesc1(q){
   const vals=[...new Set(TXS.map(t=>t.desc).filter(Boolean))].sort();
   makeGrafDrop('graf-desc1-drop','graf-desc1','graf-desc1-input',vals,q);
-  document.getElementById('graf-desc1').value=q;
-  updateGrafTags();renderGraficos();
+  if(!q){document.getElementById('graf-desc1').value='';updateGrafTags();renderGraficos();}
 }
 function filterGrafDesc2(q){
   const vals=[...new Set(TXS.map(t=>t.desc2).filter(Boolean))].sort();
   makeGrafDrop('graf-desc2-drop','graf-desc2','graf-desc2-input',vals,q);
-  document.getElementById('graf-desc2').value=q;
-  updateGrafTags();renderGraficos();
+  if(!q){document.getElementById('graf-desc2').value='';updateGrafTags();renderGraficos();}
 }
 function makeGrafDrop(dropId,hiddenId,inputId,values,query){
   const drop=document.getElementById(dropId);if(!drop)return;
@@ -2503,7 +2501,7 @@ function makeGrafDrop(dropId,hiddenId,inputId,values,query){
   const matches=values.filter(v=>v&&v.toLowerCase().includes(q)).slice(0,20);
   if(!matches.length){drop.style.display='none';return;}
   drop.innerHTML=matches.map(v=>`<div style="padding:.45rem .8rem;cursor:pointer;font-size:.82rem;color:var(--text);border-bottom:1px solid var(--border-light)"
-    onmousedown="selectGrafDesc('${dropId}','${hiddenId}','${inputId}',${JSON.stringify(v)})">${v}</div>`).join('');
+    onmousedown="event.preventDefault();selectGrafDesc('${dropId}','${hiddenId}','${inputId}',${JSON.stringify(v)})">${v}</div>`).join('');
   drop.style.display='block';
 }
 function selectGrafDesc(dropId,hiddenId,inputId,val){
@@ -2543,7 +2541,7 @@ function makeRevDrop(dropId, hiddenId, inputId, values, query){
   if(!matches.length){drop.style.display='none';return;}
   drop.innerHTML=matches.map(v=>`
     <div style="padding:.45rem .8rem;cursor:pointer;font-size:.82rem;color:var(--text);border-bottom:1px solid var(--border-light)"
-      onmousedown="selectRevDesc('${dropId}','${hiddenId}','${inputId}',${JSON.stringify(v)})">
+      onmousedown="event.preventDefault();selectRevDesc('${dropId}','${hiddenId}','${inputId}',${JSON.stringify(v)})">
       ${v}
     </div>`).join('');
   drop.style.display='block';
@@ -2560,14 +2558,12 @@ function selectRevDesc(dropId, hiddenId, inputId, val){
 function filterRevDesc1(q){
   const vals=[...new Set(TXS.map(t=>t.desc).filter(Boolean))].sort();
   makeRevDrop('rev-desc1-drop','rev-desc1','rev-desc1-input',vals,q);
-  document.getElementById('rev-desc1').value=q;
-  updateRevTags();renderRevision();
+  if(!q){document.getElementById('rev-desc1').value='';updateRevTags();renderRevision();}
 }
 function filterRevDesc2(q){
   const vals=[...new Set(TXS.map(t=>t.desc2).filter(Boolean))].sort();
   makeRevDrop('rev-desc2-drop','rev-desc2','rev-desc2-input',vals,q);
-  document.getElementById('rev-desc2').value=q;
-  updateRevTags();renderRevision();
+  if(!q){document.getElementById('rev-desc2').value='';updateRevTags();renderRevision();}
 }
  
 function updateRevTags(){
@@ -2638,9 +2634,9 @@ function renderRevision(){
   const fAcc  = document.getElementById('rev-acc')?.value||'';
   const fCat  = document.getElementById('rev-cat')?.value||'';
   const fEst  = document.getElementById('rev-estado')?.value||'';
-  // Desc: leer del hidden (siempre sincronizado con el input visible)
-  const fDesc1=(document.getElementById('rev-desc1')?.value||'').toLowerCase().trim();
-  const fDesc2=(document.getElementById('rev-desc2')?.value||'').toLowerCase().trim();
+  // Desc: leer del input visible (funciona tanto si escribe como si selecciona del dropdown)
+  const fDesc1=(document.getElementById('rev-desc1-input')?.value||'').toLowerCase().trim();
+  const fDesc2=(document.getElementById('rev-desc2-input')?.value||'').toLowerCase().trim();
  
   // Reconstruir opciones de selectores preservando selección
   initRevisionFiltros();
@@ -2654,13 +2650,6 @@ function renderRevision(){
   if(elAcc&&fAcc) elAcc.value=fAcc;
   if(elCat&&fCat) elCat.value=fCat;
   if(elEst&&fEst) elEst.value=fEst;
-  // Restaurar también los inputs y hiddens de descripción
-  const d1Input=document.getElementById('rev-desc1-input');
-  const d2Input=document.getElementById('rev-desc2-input');
-  const d1Hidden=document.getElementById('rev-desc1');
-  const d2Hidden=document.getElementById('rev-desc2');
-  if(d1Input&&fDesc1){d1Input.value=fDesc1;if(d1Hidden)d1Hidden.value=fDesc1;}
-  if(d2Input&&fDesc2){d2Input.value=fDesc2;if(d2Hidden)d2Hidden.value=fDesc2;}
  
   let txs=[...TXS].filter(t=>t.tipo==='gasto'||t.tipo==='ingreso'||t.tipo.startsWith('inversion_'));
   if(fMes) txs=txs.filter(t=>getMesFact(t)===fMes);
