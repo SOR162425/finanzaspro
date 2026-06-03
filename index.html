@@ -568,25 +568,19 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
     <div class="g2" style="margin-top:.6rem;gap:.6rem">
       <div>
         <label>🔍 Descripción 1</label>
-        <div style="display:flex;gap:.4rem">
-          <input type="text" id="rev-desc1-input" placeholder="Ej: Farmacia, Amazon..." autocomplete="off"
-            oninput="revDescDebounce()"
-            onkeydown="if(event.key==='Enter')applyRevDesc()"
+        <div style="display:flex;gap:.35rem;align-items:center">
+          <input type="text" id="rev-desc1-input" placeholder="Escribir para filtrar..." autocomplete="off"
+            oninput="renderRevision()"
             style="font-size:.82rem;padding:.35rem .65rem;flex:1"/>
-          <button class="btn btn-primary btn-sm" onclick="applyRevDesc()">Filtrar</button>
-          <button class="btn btn-ghost btn-sm" onclick="clearRevDesc1()" title="Limpiar">✕</button>
-        </div>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('rev-desc1-input').value='';renderRevision()" title="Limpiar">✕</button>
       </div>
       <div>
         <label>📝 Descripción 2</label>
-        <div style="display:flex;gap:.4rem">
-          <input type="text" id="rev-desc2-input" placeholder="Ej: referencia, nota..." autocomplete="off"
-            oninput="revDescDebounce()"
-            onkeydown="if(event.key==='Enter')applyRevDesc()"
+        <div style="display:flex;gap:.35rem;align-items:center">
+          <input type="text" id="rev-desc2-input" placeholder="Escribir para filtrar..." autocomplete="off"
+            oninput="renderRevision()"
             style="font-size:.82rem;padding:.35rem .65rem;flex:1"/>
-          <button class="btn btn-primary btn-sm" onclick="applyRevDesc()">Filtrar</button>
-          <button class="btn btn-ghost btn-sm" onclick="clearRevDesc2()" title="Limpiar">✕</button>
-        </div>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('rev-desc2-input').value='';renderRevision()" title="Limpiar">✕</button>
       </div>
     </div>
     <div style="margin-top:.5rem;display:flex;gap:.4rem;flex-wrap:wrap" id="rev-tags"></div>
@@ -2555,36 +2549,25 @@ function selectRevDesc(dropId, hiddenId, inputId, val){
   renderRevision();
 }
  
-let _revDescTimer=null;
-function revDescDebounce(){
-  clearTimeout(_revDescTimer);
-  _revDescTimer=setTimeout(()=>{ updateRevTags(); renderRevision(); }, 350);
+function filterRevDesc1(q){
+  const vals=[...new Set(TXS.map(t=>t.desc).filter(Boolean))].sort();
+  makeRevDrop('rev-desc1-drop','rev-desc1','rev-desc1-input',vals,q);
+  if(!q){document.getElementById('rev-desc1').value='';updateRevTags();renderRevision();}
 }
-function applyRevDesc(){
-  clearTimeout(_revDescTimer);
-  updateRevTags();
-  renderRevision();
+function filterRevDesc2(q){
+  const vals=[...new Set(TXS.map(t=>t.desc2).filter(Boolean))].sort();
+  makeRevDrop('rev-desc2-drop','rev-desc2','rev-desc2-input',vals,q);
+  if(!q){document.getElementById('rev-desc2').value='';updateRevTags();renderRevision();}
 }
-function clearRevDesc1(){
-  document.getElementById('rev-desc1-input').value='';
-  updateRevTags(); renderRevision();
-}
-function clearRevDesc2(){
-  document.getElementById('rev-desc2-input').value='';
-  updateRevTags(); renderRevision();
-}
-// funciones legacy vacías por si algo las llama
-function filterRevDesc1(q){}
-function filterRevDesc2(q){}
  
 function updateRevTags(){
   const tags=document.getElementById('rev-tags');
   if(!tags)return;
-  const d1=document.getElementById('rev-desc1-input')?.value?.trim();
-  const d2=document.getElementById('rev-desc2-input')?.value?.trim();
+  const d1=document.getElementById('rev-desc1')?.value;
+  const d2=document.getElementById('rev-desc2')?.value;
   tags.innerHTML=[
-    d1?`<span style="font-size:.72rem;background:var(--primary-pale);color:var(--primary-dark);padding:.18rem .6rem;border-radius:9999px;font-weight:600;cursor:pointer" onclick="clearRevDesc1()">🔍 ${d1} ✕</span>`:'',
-    d2?`<span style="font-size:.72rem;background:var(--primary-pale);color:var(--primary-dark);padding:.18rem .6rem;border-radius:9999px;font-weight:600;cursor:pointer" onclick="clearRevDesc2()">📝 ${d2} ✕</span>`:'',
+    d1?`<span style="font-size:.72rem;background:var(--primary-pale);color:var(--primary-dark);padding:.18rem .6rem;border-radius:9999px;font-weight:600;cursor:pointer" onclick="clearRevDesc('rev-desc1','rev-desc1-input')">🔍 ${d1} ✕</span>`:'',
+    d2?`<span style="font-size:.72rem;background:var(--primary-pale);color:var(--primary-dark);padding:.18rem .6rem;border-radius:9999px;font-weight:600;cursor:pointer" onclick="clearRevDesc('rev-desc2','rev-desc2-input')">📝 ${d2} ✕</span>`:'',
   ].join('');
 }
 function clearRevDesc(hiddenId, inputId){
@@ -2648,7 +2631,6 @@ function renderRevision(){
   // Desc: leer del input visible (funciona tanto si escribe como si selecciona del dropdown)
   const fDesc1=(document.getElementById('rev-desc1-input')?.value||'').toLowerCase().trim();
   const fDesc2=(document.getElementById('rev-desc2-input')?.value||'').toLowerCase().trim();
-  // (lee directo del input — no depende de hidden ni dropdown)
  
   // Reconstruir opciones de selectores preservando selección
   initRevisionFiltros();
@@ -2791,3 +2773,4 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
+ 
