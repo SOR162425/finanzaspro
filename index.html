@@ -1383,7 +1383,7 @@ function renderDashboard(){
   const dineroDispo=totalBalance; // saldo en cuentas (ya descuenta inversiones depositadas)
  
   document.getElementById('stats-grid').innerHTML=[
-    {label:'Patrimonio total',val:fmt(totalBalance+invNeto),cls:'c-orange',sub:'Cuentas + inversiones'},
+    {label:'Patrimonio total',val:fmt(totalNoCred+invNeto),cls:'c-orange',sub:'Cuentas + inversiones'},
     {label:'Total cuentas',val:fmt(totalNoCred),cls:'c-orange',sub:`${accsCorriente.length} cta${accsCorriente.length!==1?'s':''} (sin tarjetas)`},
     {label:'Ingresos mes (fact.)',val:fmt(ingrM),cls:'c-green'},
     {label:'Gastos mes (fact.)',val:fmt(gastM),cls:'c-red'},
