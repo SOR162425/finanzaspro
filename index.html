@@ -1354,6 +1354,8 @@ function renderDashboard(){
   const gastM=txM.filter(t=>t.tipo==='gasto').reduce((s,t)=>s+t.monto,0);
   const bal=ingrM-gastM;
   const totalBalance=ACCS.reduce((s,a)=>s+accBalance(a.id),0);
+  const accsCorriente=ACCS.filter(a=>a.tipo==='corriente'||a.tipo==='ahorro'||a.tipo==='vista');
+  const totalNoCred=accsCorriente.reduce((s,a)=>s+accBalance(a.id),0);
   const ahorr=METAS.reduce((s,m)=>s+m.actual,0);
  
   // Inversiones: total depositado - total rescatado por instrumento
@@ -1382,7 +1384,7 @@ function renderDashboard(){
  
   document.getElementById('stats-grid').innerHTML=[
     {label:'Patrimonio total',val:fmt(totalBalance+invNeto),cls:'c-orange',sub:'Cuentas + inversiones'},
-    {label:'Total cuentas',val:fmt(totalBalance),cls:'c-orange',sub:`${ACCS.length} cuenta${ACCS.length!==1?'s':''}`},
+    {label:'Total cuentas',val:fmt(totalNoCred),cls:'c-orange',sub:`${accsCorriente.length} cta${accsCorriente.length!==1?'s':''} (sin tarjetas)`},
     {label:'Ingresos mes (fact.)',val:fmt(ingrM),cls:'c-green'},
     {label:'Gastos mes (fact.)',val:fmt(gastM),cls:'c-red'},
     {label:'Metas ahorradas',val:fmt(ahorr),cls:'c-mid',sub:`${METAS.length} meta${METAS.length!==1?'s':''}`},
@@ -2608,3 +2610,4 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
+ 
