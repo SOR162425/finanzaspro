@@ -1551,8 +1551,8 @@ function renderGraficos(){
   const fMeses = parseInt(document.getElementById('graf-meses')?.value||'6');
   const fTipo  = document.getElementById('graf-tipo')?.value||'todos';
   const fCat   = document.getElementById('graf-cat')?.value||'';
-  const fGDesc1= document.getElementById('graf-desc1')?.value||'';
-  const fGDesc2= document.getElementById('graf-desc2')?.value||'';
+  const fGDesc1= document.getElementById('graf-desc1')?.value||document.getElementById('graf-desc1-input')?.value.trim()||'';
+  const fGDesc2= document.getElementById('graf-desc2')?.value||document.getElementById('graf-desc2-input')?.value.trim()||'';
  
   // Función de filtro base
   const now=new Date();
@@ -2635,8 +2635,8 @@ function renderRevision(){
   const fCat  = document.getElementById('rev-cat')?.value||'';
   const fEst  = document.getElementById('rev-estado')?.value||'';
   // Desc: leer del input visible (funciona tanto si escribe como si selecciona del dropdown)
-  const fDesc1=(document.getElementById('rev-desc1-input')?.value||'').toLowerCase().trim();
-  const fDesc2=(document.getElementById('rev-desc2-input')?.value||'').toLowerCase().trim();
+  const fDesc1=(document.getElementById('rev-desc1')?.value||document.getElementById('rev-desc1-input')?.value||'').toLowerCase().trim();
+  const fDesc2=(document.getElementById('rev-desc2')?.value||document.getElementById('rev-desc2-input')?.value||'').toLowerCase().trim();
  
   // Reconstruir opciones de selectores preservando selección
   initRevisionFiltros();
@@ -2779,4 +2779,3 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
- 
