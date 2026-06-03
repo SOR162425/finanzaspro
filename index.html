@@ -2584,38 +2584,21 @@ function clearRevDesc(hiddenId, inputId){
 }
  
 function initRevisionFiltros(){
-  // Guardar valores actuales antes de reconstruir
-  const prevMes  = document.getElementById('rev-mes')?.value||'';
-  const prevAcc  = document.getElementById('rev-acc')?.value||'';
-  const prevCat  = document.getElementById('rev-cat')?.value||'';
-  const prevEst  = document.getElementById('rev-estado')?.value||'';
- 
   // Meses disponibles
   const meses=[...new Set(TXS.map(t=>getMesFact(t)))].filter(Boolean).sort().reverse();
   const revMes=document.getElementById('rev-mes');
-  if(revMes){
-    revMes.innerHTML='<option value="">Todos</option>'+meses.map(m=>`<option value="${m}">${fmtMesAño(m)}</option>`).join('');
-    revMes.value=prevMes;
-  }
+  if(revMes) revMes.innerHTML='<option value="">Todos</option>'+meses.map(m=>`<option value="${m}">${fmtMesAño(m)}</option>`).join('');
  
   // Cuentas
   const revAcc=document.getElementById('rev-acc');
-  if(revAcc){
-    revAcc.innerHTML='<option value="">Todas</option>'+accsOrdenadas().map(a=>`<option value="${a.id}">${TIPO_ICONS[a.tipo]} ${a.nombre}</option>`).join('');
-    revAcc.value=prevAcc;
-  }
+  if(revAcc) revAcc.innerHTML='<option value="">Todas</option>'+accsOrdenadas().map(a=>`<option value="${a.id}">${TIPO_ICONS[a.tipo]} ${a.nombre}</option>`).join('');
  
   // Categorías
   const cats=[...new Set(TXS.map(t=>t.cat))].filter(Boolean).sort();
   const revCat=document.getElementById('rev-cat');
-  if(revCat){
-    revCat.innerHTML='<option value="">Todas</option>'+cats.map(c=>`<option>${c}</option>`).join('');
-    revCat.value=prevCat;
-  }
+  if(revCat) revCat.innerHTML='<option value="">Todas</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
  
-  // Restaurar estado
-  const revEst=document.getElementById('rev-estado');
-  if(revEst) revEst.value=prevEst;
+ 
 }
  
 let revEditId=null;
@@ -2646,13 +2629,27 @@ function saveRevEdit(id){
 }
  
 function renderRevision(){
+  // Guardar valores ANTES de reconstruir
+  const fMes  = document.getElementById('rev-mes')?.value||'';
+  const fAcc  = document.getElementById('rev-acc')?.value||'';
+  const fCat  = document.getElementById('rev-cat')?.value||'';
+  const fEst  = document.getElementById('rev-estado')?.value||'';
+  // Desc: leer del input visible (funciona tanto si escribe como si selecciona del dropdown)
+  const fDesc1=(document.getElementById('rev-desc1-input')?.value||'').toLowerCase().trim();
+  const fDesc2=(document.getElementById('rev-desc2-input')?.value||'').toLowerCase().trim();
+ 
+  // Reconstruir opciones de selectores preservando selección
   initRevisionFiltros();
-  const fMes=document.getElementById('rev-mes')?.value||'';
-  const fAcc=document.getElementById('rev-acc')?.value||'';
-  const fCat=document.getElementById('rev-cat')?.value||'';
-  const fEst=document.getElementById('rev-estado')?.value||'';
-  const fDesc1=(document.getElementById('rev-desc1')?.value||'').toLowerCase().trim();
-  const fDesc2=(document.getElementById('rev-desc2')?.value||'').toLowerCase().trim();
+ 
+  // Restaurar valores después de reconstruir
+  const elMes=document.getElementById('rev-mes');
+  const elAcc=document.getElementById('rev-acc');
+  const elCat=document.getElementById('rev-cat');
+  const elEst=document.getElementById('rev-estado');
+  if(elMes&&fMes) elMes.value=fMes;
+  if(elAcc&&fAcc) elAcc.value=fAcc;
+  if(elCat&&fCat) elCat.value=fCat;
+  if(elEst&&fEst) elEst.value=fEst;
  
   let txs=[...TXS].filter(t=>t.tipo==='gasto'||t.tipo==='ingreso'||t.tipo.startsWith('inversion_'));
   if(fMes) txs=txs.filter(t=>getMesFact(t)===fMes);
