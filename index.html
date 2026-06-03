@@ -174,9 +174,9 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
     <button onclick="showTab('transacciones',this)">💳 Transacciones</button>
     <button onclick="showTab('empresas',this)">🏢 Empresas</button>
     <button onclick="showTab('graficos',this)">📈 Gráficos</button>
-    <button onclick="showTab('revision',this)">✅ Revisión</button>
     <button onclick="showTab('presupuesto',this)">📋 Presupuesto</button>
     <button onclick="showTab('metas',this)">🎯 Metas</button>
+    <button onclick="showTab('revision',this)">✅ Revisión</button>
     <button onclick="showTab('respaldo',this)">💾 Respaldo</button>
   </nav>
 </header>
@@ -502,6 +502,7 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
     <div style="margin-top:.4rem;display:flex;gap:.4rem;flex-wrap:wrap" id="graf-tags"></div>
   </div>
   <div class="card"><h2 id="pie-title">Gastos por categoría</h2><div id="pie-chart-wrap"></div></div>
+  <div class="card"><h2 id="desc-pie-title">Gastos por descripción</h2><div id="desc-pie-wrap"></div></div>
   <div class="card"><h2 id="bar-title">Ingresos vs Gastos</h2><div id="bar-chart-wrap"></div></div>
   <div class="card"><h2 id="acc-mes-title">Ingresos y gastos por cuenta</h2><div id="acc-mes-wrap"></div></div>
   <div class="card"><h2>Balance total por cuenta</h2><div id="acc-bar-wrap"></div></div>
@@ -568,17 +569,28 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
     <div class="g2" style="margin-top:.6rem;gap:.6rem">
       <div>
         <label>🔍 Descripción 1</label>
-        <select id="rev-desc1-input" onchange="renderRevision()" style="font-size:.82rem;padding:.35rem .65rem;width:100%">
-          <option value="">Todas</option>
-        </select>
+        <div style="position:relative">
+          <input type="text" id="rev-desc1-input" placeholder="Buscar o seleccionar..." autocomplete="off"
+            oninput="filterRevDesc1(this.value)" onfocus="filterRevDesc1(this.value)"
+            onblur="setTimeout(()=>document.getElementById('rev-desc1-drop').style.display='none',180)"
+            style="font-size:.82rem;padding:.35rem .65rem"/>
+          <div id="rev-desc1-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:.55rem;margin-top:.15rem;z-index:300;box-shadow:0 4px 12px rgba(234,88,12,.12);max-height:180px;overflow-y:auto"></div>
+        </div>
+        <input type="hidden" id="rev-desc1"/>
       </div>
       <div>
         <label>📝 Descripción 2</label>
-        <select id="rev-desc2-input" onchange="renderRevision()" style="font-size:.82rem;padding:.35rem .65rem;width:100%">
-          <option value="">Todas</option>
-        </select>
+        <div style="position:relative">
+          <input type="text" id="rev-desc2-input" placeholder="Buscar o seleccionar..." autocomplete="off"
+            oninput="filterRevDesc2(this.value)" onfocus="filterRevDesc2(this.value)"
+            onblur="setTimeout(()=>document.getElementById('rev-desc2-drop').style.display='none',180)"
+            style="font-size:.82rem;padding:.35rem .65rem"/>
+          <div id="rev-desc2-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:.55rem;margin-top:.15rem;z-index:300;box-shadow:0 4px 12px rgba(234,88,12,.12);max-height:180px;overflow-y:auto"></div>
+        </div>
+        <input type="hidden" id="rev-desc2"/>
       </div>
     </div>
+    <div style="margin-top:.5rem;display:flex;gap:.4rem;flex-wrap:wrap" id="rev-tags"></div>
   </div>
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem">
@@ -1581,6 +1593,21 @@ function renderGraficos(){
   document.getElementById('pie-title').textContent=pieTitle+(fOrg!=='todas'?' · '+fOrg:'')+(accNombre?' · '+accNombre:'');
   document.getElementById('pie-chart-wrap').innerHTML=pieData.length
     ? buildPie(pieData,totalPie)
+    : `<div class="empty">Sin datos con los filtros seleccionados</div>`;
+
+  // Pie por descripción
+  const descAcc={};
+  txFilt.filter(t=>fTipo==='todos'?t.tipo==='gasto':tiposGraf.includes(t.tipo))
+    .forEach(t=>{
+      const key=(t.desc||t.cat||'Sin descripción').trim();
+      descAcc[key]=(descAcc[key]||0)+t.monto;
+    });
+  const descPieData=Object.entries(descAcc).map(([n,v])=>({n,v})).sort((a,b)=>b.v-a.v).slice(0,12);
+  const totalDescPie=descPieData.reduce((s,p)=>s+p.v,0);
+  const descPieTitle=fTipo==='ingreso'?'Ingresos por descripción':fTipo==='inversion'?'Inversiones por descripción':'Gastos por descripción';
+  document.getElementById('desc-pie-title').textContent=descPieTitle+(fOrg!=='todas'?' · '+fOrg:'')+(accNombre?' · '+accNombre:'');
+  document.getElementById('desc-pie-wrap').innerHTML=descPieData.length
+    ? buildPie(descPieData,totalDescPie)
     : `<div class="empty">Sin datos con los filtros seleccionados</div>`;
 
   // Bar por meses
@@ -2587,15 +2614,7 @@ function initRevisionFiltros(){
   const revCat=document.getElementById('rev-cat');
   if(revCat) revCat.innerHTML='<option value="">Todas</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
 
-  // Descripción 1
-  const descs1=[...new Set(TXS.map(t=>t.desc).filter(Boolean))].sort();
-  const selD1=document.getElementById('rev-desc1-input');
-  if(selD1){const prev=selD1.value;selD1.innerHTML='<option value="">Todas</option>'+descs1.map(d=>`<option value="${d}"${d===prev?' selected':''}>${d}</option>`).join('');}
 
-  // Descripción 2
-  const descs2=[...new Set(TXS.map(t=>t.desc2).filter(Boolean))].sort();
-  const selD2=document.getElementById('rev-desc2-input');
-  if(selD2){const prev=selD2.value;selD2.innerHTML='<option value="">Todas</option>'+descs2.map(d=>`<option value="${d}"${d===prev?' selected':''}>${d}</option>`).join('');}
 }
 
 let revEditId=null;
