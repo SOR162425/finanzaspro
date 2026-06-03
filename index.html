@@ -339,7 +339,7 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
         <label>Monto (CLP)</label>
         <input type="number" id="tx-monto" placeholder="0" onkeydown="if(event.key==='Enter')addTx()"/>
       </div>
-      <div class="span2">
+      <div>
         <label>Descripción (opcional)</label>
         <div style="position:relative">
           <input type="text" id="tx-desc" placeholder="Ej: Supermercado Lider" autocomplete="off"
@@ -348,6 +348,10 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
             onblur="setTimeout(()=>hideSuggestions(),150)"/>
           <div id="tx-suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:.55rem;margin-top:.2rem;z-index:200;box-shadow:0 4px 16px rgba(234,88,12,.12);max-height:200px;overflow-y:auto"></div>
         </div>
+      </div>
+      <div>
+        <label>Descripción 2 <span style="font-weight:400;color:var(--text-muted)">(opcional)</span></label>
+        <input type="text" id="tx-desc2" placeholder="Ej: Referencia, comercio, nota..."/>
       </div>
       <div>
         <label>📅 Fecha exacta</label>
@@ -528,6 +532,10 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
           <option value="revisado">✅ Apareció en cartola</option>
         </select>
       </div>
+    </div>
+    <div style="margin-top:.6rem;display:flex;align-items:center;gap:.5rem">
+      <label style="margin:0;white-space:nowrap">📝 Descripción 2</label>
+      <input type="text" id="rev-desc2" placeholder="Buscar en descripción 2..." oninput="renderRevision()" style="flex:1;font-size:.82rem;padding:.35rem .65rem"/>
     </div>
   </div>
   <div class="card">
@@ -991,6 +999,7 @@ function addTx(){
   const cat=document.getElementById('tx-cat').value||'Transferencia';
   const monto=getRawValue(document.getElementById('tx-monto'));
   const desc=document.getElementById('tx-desc').value.trim();
+  const desc2=document.getElementById('tx-desc2')?.value.trim()||'';
   const fecha=document.getElementById('tx-fecha').value;
   const org=document.getElementById('tx-org').value;
   const periodoMes=document.getElementById('tx-periodo-mes').value;
@@ -1012,7 +1021,7 @@ function addTx(){
     }
   }:{};
  
-  const txData={tipo,org,accId,accDestId,cat,monto,desc,fecha,
+  const txData={tipo,org,accId,accDestId,cat,monto,desc,desc2,fecha,
     sinCuenta: sinCuenta||false,
     periodo:`${periodoAño}-${periodoMes}`,
     factura: esCredito?`${facturaAño}-${facturaMes}`:null,
@@ -1239,6 +1248,7 @@ function renderTxList(){
             ${t.org&&t.org!=='Personal'?`<span style="font-size:.6rem;font-weight:700;padding:.08rem .4rem;border-radius:9999px;background:${(ORG_COLORS[t.org]||{light:'#f3f4f6'}).light};color:${(ORG_COLORS[t.org]||{dark:'#374151'}).dark}">${t.org}</span>`:''}
           </div>
           <div class="tx-sub">${sub}</div>
+          ${t.desc2?`<div class="tx-sub" style="color:var(--primary-dark);font-style:italic">📝 ${t.desc2}</div>`:''}
           ${t.sinCuenta?`<span style="font-size:.62rem;font-weight:700;background:#f3e8ff;color:#6b21a8;padding:.08rem .4rem;border-radius:9999px">📦 Inversión existente</span>`:''}
           ${t.cuotas?`<span style="font-size:.62rem;font-weight:700;background:#ede9fe;color:#5b21b6;padding:.08rem .4rem;border-radius:9999px">Cuota ${t.cuotas.num}/${t.cuotas.total} · Total ${fmt(t.cuotas.montoTotal)}</span>`:''}
           ${periodoLabel||facturaLabel?`<div class="tx-sub" style="margin-top:.1rem">${[periodoLabel,facturaLabel].filter(Boolean).join(' · ')}</div>`:''}
@@ -2483,6 +2493,7 @@ function renderRevision(){
   const fAcc=document.getElementById('rev-acc')?.value||'';
   const fCat=document.getElementById('rev-cat')?.value||'';
   const fEst=document.getElementById('rev-estado')?.value||'';
+  const fDesc2=(document.getElementById('rev-desc2')?.value||'').toLowerCase().trim();
  
   let txs=[...TXS].filter(t=>t.tipo==='gasto'||t.tipo==='ingreso'||t.tipo.startsWith('inversion_'));
   if(fMes) txs=txs.filter(t=>getMesFact(t)===fMes);
@@ -2490,6 +2501,7 @@ function renderRevision(){
   if(fCat) txs=txs.filter(t=>t.cat===fCat);
   if(fEst==='pendiente') txs=txs.filter(t=>!REVISIONES[t.id]);
   if(fEst==='revisado') txs=txs.filter(t=>!!REVISIONES[t.id]);
+  if(fDesc2) txs=txs.filter(t=>(t.desc2||'').toLowerCase().includes(fDesc2));
  
   // Ordenar por fecha más reciente primero
   txs.sort((a,b)=>b.fecha.localeCompare(a.fecha));
@@ -2545,7 +2557,7 @@ function renderRevision(){
             ${revisado?'<span style="font-size:.65rem;font-weight:700;color:var(--green);background:#dcfce7;padding:.08rem .4rem;border-radius:9999px">✅ En cartola</span>':''}
           </div>
           <div style="font-size:.68rem;color:var(--text-muted);margin-top:.1rem">
-            ${t.cat} · ${acc?acc.nombre:'?'} · ${t.fecha} · Fact: ${mesFact}
+            ${t.cat} · ${acc?acc.nombre:'?'} · ${t.fecha} · Fact: ${mesFact}${t.desc2?` · 📝 ${t.desc2}`:''}
           </div>
         </div>
         <span style="font-weight:700;font-size:.85rem;white-space:nowrap;color:${t.tipo==='ingreso'?'var(--green)':'var(--red)'}">${t.tipo==='ingreso'?'+':'-'}${fmt(t.monto)}</span>
