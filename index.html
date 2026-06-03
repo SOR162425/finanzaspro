@@ -534,7 +534,7 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
 </div>
 
 <!-- REVISIÓN -->
-<div id="tab-revision" class="tab">
+<div id="tab-revision" class="tab" style="display:block">
   <div class="card" style="margin-bottom:.9rem">
     <h2 style="margin-bottom:.75rem">Filtros</h2>
     <div class="g4" style="align-items:end">
@@ -568,22 +568,17 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
     <div class="g2" style="margin-top:.6rem;gap:.6rem">
       <div>
         <label>🔍 Descripción 1</label>
-        <div style="display:flex;gap:.35rem;align-items:center">
-          <input type="text" id="rev-desc1-input" placeholder="Escribir para filtrar..." autocomplete="off"
-            oninput="renderRevision()"
-            style="font-size:.82rem;padding:.35rem .65rem;flex:1"/>
-          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('rev-desc1-input').value='';renderRevision()" title="Limpiar">✕</button>
+        <select id="rev-desc1-input" onchange="renderRevision()" style="font-size:.82rem;padding:.35rem .65rem;width:100%">
+          <option value="">Todas</option>
+        </select>
       </div>
       <div>
         <label>📝 Descripción 2</label>
-        <div style="display:flex;gap:.35rem;align-items:center">
-          <input type="text" id="rev-desc2-input" placeholder="Escribir para filtrar..." autocomplete="off"
-            oninput="renderRevision()"
-            style="font-size:.82rem;padding:.35rem .65rem;flex:1"/>
-          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('rev-desc2-input').value='';renderRevision()" title="Limpiar">✕</button>
+        <select id="rev-desc2-input" onchange="renderRevision()" style="font-size:.82rem;padding:.35rem .65rem;width:100%">
+          <option value="">Todas</option>
+        </select>
       </div>
     </div>
-    <div style="margin-top:.5rem;display:flex;gap:.4rem;flex-wrap:wrap" id="rev-tags"></div>
   </div>
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem">
@@ -2592,7 +2587,15 @@ function initRevisionFiltros(){
   const revCat=document.getElementById('rev-cat');
   if(revCat) revCat.innerHTML='<option value="">Todas</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
 
+  // Descripción 1
+  const descs1=[...new Set(TXS.map(t=>t.desc).filter(Boolean))].sort();
+  const revDesc1=document.getElementById('rev-desc1-input');
+  if(revDesc1){ const prev=revDesc1.value; revDesc1.innerHTML='<option value="">Todas</option>'+descs1.map(d=>`<option value="${d}"${d===prev?' selected':''}>${d}</option>`).join('');}
 
+  // Descripción 2
+  const descs2=[...new Set(TXS.map(t=>t.desc2).filter(Boolean))].sort();
+  const revDesc2=document.getElementById('rev-desc2-input');
+  if(revDesc2){ const prev=revDesc2.value; revDesc2.innerHTML='<option value="">Todas</option>'+descs2.map(d=>`<option value="${d}"${d===prev?' selected':''}>${d}</option>`).join('');}
 }
 
 let revEditId=null;
@@ -2631,6 +2634,7 @@ function renderRevision(){
   // Desc: leer del input visible (funciona tanto si escribe como si selecciona del dropdown)
   const fDesc1=(document.getElementById('rev-desc1-input')?.value||'').toLowerCase().trim();
   const fDesc2=(document.getElementById('rev-desc2-input')?.value||'').toLowerCase().trim();
+  // Lee directo del select — funciona siempre
 
   // Reconstruir opciones de selectores preservando selección
   initRevisionFiltros();
