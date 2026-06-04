@@ -382,12 +382,11 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
             <input type="checkbox" id="tx-es-cuota" onchange="toggleCuotaFields()" style="width:15px;height:15px;accent-color:var(--primary)"/>
             <label style="margin:0;font-weight:700;color:var(--primary-dark);cursor:pointer" for="tx-es-cuota">💳 Compra en cuotas</label>
           </div>
-          <div id="tx-cuota-fields" style="display:none;display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem">
-            <div><label style="font-size:.7rem">Total cuotas</label><input type="number" id="tx-cuota-total" placeholder="12" min="2" class="input" style="font-size:.82rem" onchange="calcCuota()"/></div>
-            <div><label style="font-size:.7rem">Cuota N°</label><input type="number" id="tx-cuota-num" placeholder="1" min="1" class="input" style="font-size:.82rem"/></div>
-            <div><label style="font-size:.7rem">Monto total compra</label><input type="number" id="tx-cuota-montototal" placeholder="0" class="input" style="font-size:.82rem" onchange="calcCuota()"/></div>
+          <div id="tx-cuota-fields" style="display:none;display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+            <div><label style="font-size:.7rem">Monto total compra</label><input type="number" id="tx-cuota-montototal" placeholder="0" class="input" style="font-size:.82rem" oninput="calcCuota()"/></div>
+            <div><label style="font-size:.7rem">N° de cuotas</label><input type="number" id="tx-cuota-total" placeholder="12" min="2" class="input" style="font-size:.82rem" oninput="calcCuota()"/></div>
           </div>
-          <div id="tx-cuota-calc" style="display:none;font-size:.75rem;color:var(--primary-dark);margin-top:.4rem;font-weight:600"></div>
+          <div id="tx-cuota-calc" style="display:none;font-size:.75rem;color:var(--primary-dark);margin-top:.4rem;font-weight:600;background:var(--primary-pale);padding:.5rem .75rem;border-radius:.5rem"></div>
         </div>
       </div>
     </div>
@@ -1057,28 +1056,56 @@ function addTx(){
 
   // Cuotas
   const esCuota=document.getElementById('tx-es-cuota')?.checked&&esCredito;
-  const cuotaData=esCuota?{
-    cuotas:{
-      total:parseInt(document.getElementById('tx-cuota-total')?.value||1),
-      num:parseInt(document.getElementById('tx-cuota-num')?.value||1),
-      montoTotal:parseFloat(document.getElementById('tx-cuota-montototal')?.value||monto),
-    }
-  }:{};
-
-  const txData={tipo,org,accId,accDestId,cat,monto,desc,desc2,fecha,
-    sinCuenta: sinCuenta||false,
-    periodo:`${periodoAño}-${periodoMes}`,
-    factura: esCredito?`${facturaAño}-${facturaMes}`:null,
-    ...cuotaData};
+  const nCuotas=parseInt(document.getElementById('tx-cuota-total')?.value||0);
+  const montoTotalCuota=parseFloat(document.getElementById('tx-cuota-montototal')?.value||0);
 
   if(editingTxId){
-    // Modo edición: actualizar transacción existente
-    TXS=TXS.map(t=>t.id===editingTxId?{...t,...txData}:t);
+    // Modo edición: actualizar transacción existente (sin regenerar cuotas)
+    const cuotaDataEdit=esCuota&&nCuotas>=2?{cuotas:{total:nCuotas,num:1,montoTotal:montoTotalCuota}}:{};
+    const txDataEdit={tipo,org,accId,accDestId,cat,monto,desc,desc2,fecha,
+      sinCuenta:sinCuenta||false,
+      periodo:`${periodoAño}-${periodoMes}`,
+      factura:esCredito?`${facturaAño}-${facturaMes}`:null,
+      ...cuotaDataEdit};
+    TXS=TXS.map(t=>t.id===editingTxId?{...t,...txDataEdit}:t);
     editingTxId=null;
     const btn=document.querySelector('[onclick="addTx()"]');
     btn.textContent='+ Agregar';
     btn.style.background='';
+  } else if(esCuota&&nCuotas>=2&&montoTotalCuota>0){
+    // Generar todas las cuotas automáticamente
+    const montoCuota=Math.round(montoTotalCuota/nCuotas);
+    const baseFacturaMes=parseInt(facturaMes);
+    const baseFacturaAño=parseInt(facturaAño);
+    const basePeriodoMes=parseInt(periodoMes);
+    const basePeriodoAño=parseInt(periodoAño);
+    const baseTs=Date.now();
+    for(let i=0;i<nCuotas;i++){
+      // Calcular mes/año de factura para cada cuota
+      const fMes=((baseFacturaMes-1+i)%12)+1;
+      const fAño=baseFacturaAño+Math.floor((baseFacturaMes-1+i)/12);
+      const pMes=((basePeriodoMes-1+i)%12)+1;
+      const pAño=basePeriodoAño+Math.floor((basePeriodoMes-1+i)/12);
+      // Ajuste de monto: la última cuota absorbe el diferencial de redondeo
+      const montoFinal=i===nCuotas-1?montoTotalCuota-montoCuota*(nCuotas-1):montoCuota;
+      TXS.unshift({
+        id:baseTs+i,tipo,org,accId,accDestId,cat,
+        monto:montoFinal,
+        desc,desc2,fecha,
+        sinCuenta:sinCuenta||false,
+        periodo:`${pAño}-${String(pMes).padStart(2,'0')}`,
+        factura:esCredito?`${fAño}-${String(fMes).padStart(2,'0')}`:null,
+        cuotas:{total:nCuotas,num:i+1,montoTotal:montoTotalCuota}
+      });
+    }
+    // Reordenar: cuota 1 primero
+    TXS.sort((a,b)=>b.id-a.id);
   } else {
+    // Transacción normal
+    const txData={tipo,org,accId,accDestId,cat,monto,desc,desc2,fecha,
+      sinCuenta:sinCuenta||false,
+      periodo:`${periodoAño}-${periodoMes}`,
+      factura:esCredito?`${facturaAño}-${facturaMes}`:null};
     TXS.unshift({id:Date.now(),...txData});
   }
 
@@ -1120,11 +1147,17 @@ function calcCuota(){
   const total=parseFloat(document.getElementById('tx-cuota-montototal')?.value||0);
   const n=parseInt(document.getElementById('tx-cuota-total')?.value||0);
   const calc=document.getElementById('tx-cuota-calc');
-  if(total&&n&&calc){
+  if(!calc) return;
+  if(total&&n>=2){
     const cuota=Math.round(total/n);
-    calc.textContent=`Cuota mensual: ${fmt(cuota)} (${fmt(total)} ÷ ${n} cuotas)`;
-    document.getElementById('tx-monto').value=new Intl.NumberFormat('es-CL').format(cuota);
-    document.getElementById('tx-monto').dataset.raw=cuota;
+    calc.style.display='block';
+    calc.innerHTML=`💳 Se crearán <strong>${n} cuotas</strong> de <strong>${fmt(cuota)}</strong> c/u &nbsp;·&nbsp; Total: ${fmt(total)}`;
+    // El monto del formulario = total de la compra (informativo)
+    document.getElementById('tx-monto').value=new Intl.NumberFormat('es-CL').format(total);
+    document.getElementById('tx-monto').dataset.raw=total;
+  } else {
+    calc.style.display='none';
+    calc.innerHTML='';
   }
 }
 
