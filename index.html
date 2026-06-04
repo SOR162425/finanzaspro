@@ -416,7 +416,7 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
         <select id="pres-cat">
           <option>Alimentación</option><option>Transporte</option><option>Casa</option>
           <option>Salud</option><option>Educación</option><option>Entretenimiento</option>
-          <option>Ropa</option><option>Servicios</option><option>Otros</option>
+          <option>Ropa</option><option>Servicios</option><option>Vacaciones</option><option>Otros</option>
         </select>
       </div>
       <div style="flex:1;min-width:120px"><label>Límite (CLP)</label>
@@ -502,7 +502,8 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
     <div style="margin-top:.4rem;display:flex;gap:.4rem;flex-wrap:wrap" id="graf-tags"></div>
   </div>
   <div class="card"><h2 id="pie-title">Gastos por categoría</h2><div id="pie-chart-wrap"></div></div>
-  <div class="card"><h2 id="desc-pie-title">Gastos por descripción</h2><div id="desc-pie-wrap"></div></div>
+  <div class="card"><h2 id="desc-pie-title">Gastos por descripción 1</h2><div id="desc-pie-wrap"></div></div>
+  <div class="card"><h2 id="desc2-pie-title">Gastos por descripción 2</h2><div id="desc2-pie-wrap"></div></div>
   <div class="card"><h2 id="bar-title">Ingresos vs Gastos</h2><div id="bar-chart-wrap"></div></div>
   <div class="card"><h2 id="acc-mes-title">Ingresos y gastos por cuenta</h2><div id="acc-mes-wrap"></div></div>
   <div class="card"><h2>Balance total por cuenta</h2><div id="acc-bar-wrap"></div></div>
@@ -664,7 +665,7 @@ const ORGS = ['Personal','P&A Consulting','P&A Supply'];
 
 const CATS = {
   gasto: {
-    'Personal':       ['Alimentación','Transporte','Casa','Auto','Salud','Educación','Entretenimiento','Ropa','Servicios','Crédito','Mit','Otros'],
+    'Personal':       ['Alimentación','Transporte','Casa','Auto','Salud','Educación','Entretenimiento','Ropa','Servicios','Crédito','Mit','Vacaciones','Otros'],
     'P&A Consulting': ['Arriendo oficina','Servicios básicos','Insumos','Proveedores','Software/Licencias','Marketing','Contabilidad/Legal','Honorarios externos','Viáticos','Otros operacionales'],
     'P&A Supply':     ['Arriendo bodega','Insumos y materiales','Proveedores','Logística/Transporte','Software/Licencias','Marketing','Contabilidad/Legal','Honorarios externos','Viáticos','Otros operacionales'],
   },
@@ -1598,6 +1599,21 @@ function renderGraficos(){
   document.getElementById('desc-pie-wrap').innerHTML=descPieData.length
     ? buildPie(descPieData,totalDescPie)
     : `<div class="empty">Sin datos con los filtros seleccionados</div>`;
+
+  // Pie por descripción 2
+  const desc2Acc={};
+  txFilt.filter(t=>fTipo==='todos'?t.tipo==='gasto':tiposGraf.includes(t.tipo))
+    .forEach(t=>{
+      const key=(t.desc2||'').trim();
+      if(key) desc2Acc[key]=(desc2Acc[key]||0)+t.monto;
+    });
+  const desc2PieData=Object.entries(desc2Acc).map(([n,v])=>({n,v})).sort((a,b)=>b.v-a.v).slice(0,12);
+  const totalDesc2Pie=desc2PieData.reduce((s,p)=>s+p.v,0);
+  const desc2PieTitle=fTipo==='ingreso'?'Ingresos por descripción 2':fTipo==='inversion'?'Inversiones por descripción 2':'Gastos por descripción 2';
+  document.getElementById('desc2-pie-title').textContent=desc2PieTitle+(fOrg!=='todas'?' · '+fOrg:'')+(accNombre?' · '+accNombre:'');
+  document.getElementById('desc2-pie-wrap').innerHTML=desc2PieData.length
+    ? buildPie(desc2PieData,totalDesc2Pie)
+    : `<div class="empty">Sin transacciones con descripción 2 en este período</div>`;
 
   // Bar por meses
   const nMeses=fMeses===0?1:fMeses;
