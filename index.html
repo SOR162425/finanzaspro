@@ -1056,8 +1056,8 @@ function addTx(){
 
   // Cuotas
   const esCuota=document.getElementById('tx-es-cuota')?.checked&&esCredito;
-  const nCuotas=parseInt(document.getElementById('tx-cuota-total')?.value||0);
-  const montoTotalCuota=parseFloat(document.getElementById('tx-cuota-montototal')?.value||0);
+  const nCuotas=parseInt((document.getElementById('tx-cuota-total')?.dataset.raw||document.getElementById('tx-cuota-total')?.value||'0').replace(/\D/g,''))||0;
+  const montoTotalCuota=getRawValue(document.getElementById('tx-cuota-montototal'));
 
   if(editingTxId){
     // Modo edición: actualizar transacción existente (sin regenerar cuotas)
@@ -1141,20 +1141,30 @@ function toggleCuotaFields(){
   const fields=document.getElementById('tx-cuota-fields');
   const calc=document.getElementById('tx-cuota-calc');
   if(fields) fields.style.display=on?'grid':'none';
-  if(calc) calc.style.display=on?'block':'none';
+  if(!on&&calc) calc.style.display='none';
+  if(on){
+    // Limpiar campo monto principal para evitar confusión
+    document.getElementById('tx-monto').value='';
+    document.getElementById('tx-monto').dataset.raw='';
+    // Recalcular por si ya hay valores
+    calcCuota();
+  }
 }
 function calcCuota(){
-  const total=parseFloat(document.getElementById('tx-cuota-montototal')?.value||0);
-  const n=parseInt(document.getElementById('tx-cuota-total')?.value||0);
+  const montoInput=document.getElementById('tx-cuota-montototal');
+  const nInput=document.getElementById('tx-cuota-total');
+  // Usar getRawValue para leer correctamente valores formateados (2.000.000 → 2000000)
+  const total=getRawValue(montoInput);
+  const n=parseInt((nInput?.dataset.raw||nInput?.value||'0').replace(/\D/g,''))||0;
   const calc=document.getElementById('tx-cuota-calc');
   if(!calc) return;
-  if(total&&n>=2){
+  if(total>0&&n>=2){
     const cuota=Math.round(total/n);
     calc.style.display='block';
     calc.innerHTML=`💳 Se crearán <strong>${n} cuotas</strong> de <strong>${fmt(cuota)}</strong> c/u &nbsp;·&nbsp; Total: ${fmt(total)}`;
-    // El monto del formulario = total de la compra (informativo)
-    document.getElementById('tx-monto').value=new Intl.NumberFormat('es-CL').format(total);
-    document.getElementById('tx-monto').dataset.raw=total;
+    // Limpiar campo monto principal para que no confunda
+    document.getElementById('tx-monto').value='';
+    document.getElementById('tx-monto').dataset.raw='';
   } else {
     calc.style.display='none';
     calc.innerHTML='';
