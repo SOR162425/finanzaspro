@@ -40,7 +40,8 @@ nav button:hover:not(.active){color:var(--text)}
 main{max-width:980px;margin:0 auto;padding:1.4rem 1rem}
 .tab{display:none}.tab.active{display:block}
 /* Privacidad */
-.privacy-mode .private-num{filter:blur(7px);user-select:none;transition:filter .25s}
+.privacy-mode .tab{filter:blur(7px);user-select:none;transition:filter .25s;pointer-events:none}
+.privacy-mode.privacy-mode--off .tab{filter:none;pointer-events:auto}
 /* Cards */
 .card{background:var(--surface);border-radius:1rem;border:1px solid var(--border-light);padding:1.2rem;box-shadow:var(--shadow);margin-bottom:.9rem}
 .card h2{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.9rem}
@@ -804,6 +805,11 @@ function togglePrivacy(){
   privacyOn=!privacyOn;
   document.body.classList.toggle('privacy-mode',privacyOn);
   document.getElementById('btn-privacy').textContent=privacyOn?'🙈':'👁️';
+  // Permitir cambiar pestañas incluso en modo privado
+  document.querySelectorAll('nav button').forEach(b=>{
+    b.style.pointerEvents=privacyOn?'auto':'';
+    b.style.filter=privacyOn?'none':'';
+  });
 }
 function startRealtimeSync(){
   if(unsubscribe)unsubscribe();
