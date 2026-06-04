@@ -188,7 +188,7 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
 
 <!-- DASHBOARD -->
 <div id="tab-dashboard" class="tab">
-  <div id="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.8rem;margin-bottom:.9rem"></div>
+  <div id="stats-grid" class="private-num" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.8rem;margin-bottom:.9rem"></div>
   <div class="g2" style="margin-bottom:.9rem">
     <div class="card" style="border-left:4px solid #7c3aed">
       <h2 style="color:#7c3aed;margin-bottom:.6rem">📈 Inversiones</h2>
@@ -235,12 +235,12 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
         </div>
       </div>
       <div id="dash-evol-chart" class="private-num"></div>
-      <div id="dash-evol-legend" style="display:flex;flex-wrap:wrap;gap:.4rem .9rem;margin-top:.6rem"></div>
+      <div id="dash-evol-legend" class="private-num" style="display:flex;flex-wrap:wrap;gap:.4rem .9rem;margin-top:.6rem"></div>
     </div>
   </div>
   <div class="card">
     <h2>Balance acumulado este mes</h2>
-    <div id="line-chart"></div>
+    <div id="line-chart" class="private-num"></div>
   </div>
   <div class="card">
     <h2>Últimas transacciones</h2>
