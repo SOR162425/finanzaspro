@@ -190,6 +190,18 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
 <!-- DASHBOARD -->
 <div id="tab-dashboard" class="tab">
   <div id="stats-grid" class="private-num" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.8rem;margin-bottom:.9rem"></div>
+  <!-- Fila 1: Ingresos + Gastos por cuenta (estilo inversiones) -->
+  <div class="g2" style="margin-bottom:.9rem">
+    <div class="card">
+      <h2>💚 Ingresos del mes por cuenta</h2>
+      <div id="dash-ingresos-det" class="private-num"></div>
+    </div>
+    <div class="card" style="border-left:4px solid var(--red)">
+      <h2 style="color:var(--red);margin-bottom:.6rem">💸 Gastos del mes</h2>
+      <div id="dash-gastos-cuentas" class="private-num"></div>
+    </div>
+  </div>
+  <!-- Fila 2: Inversiones + Gastos por categoría (tabla con barras) -->
   <div class="g2" style="margin-bottom:.9rem">
     <div class="card" style="border-left:4px solid #7c3aed">
       <h2 style="color:#7c3aed;margin-bottom:.6rem">📈 Inversiones</h2>
@@ -198,10 +210,6 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
     <div class="card">
       <h2>💸 Gastos del mes por cuenta</h2>
       <div id="dash-gastos-fact" class="private-num"></div>
-    </div>
-    <div class="card">
-      <h2>💚 Ingresos del mes por cuenta</h2>
-      <div id="dash-ingresos-det" class="private-num"></div>
     </div>
   </div>
   <div class="card">
@@ -1537,17 +1545,17 @@ function renderDashboard(){
     ${invCatHtml}`
   :`<div class="empty" style="padding:.75rem">Sin inversiones registradas</div>`;
 
-  // ── Gastos por cuenta ────────────────────────────────────────────────────────
+  // ── Gastos por cuenta estilo inversiones (nueva card) ────────────────────────
   const gastPorCuenta={};
   txM.filter(t=>t.tipo==='gasto').forEach(t=>{
     const acc=accById(t.accId);
     const key=acc?acc.nombre:'Sin cuenta';
     gastPorCuenta[key]=(gastPorCuenta[key]||0)+t.monto;
   });
-  const gastDetEl=document.getElementById('dash-gastos-fact');
-  if(gastDetEl){
+  const gastCuentasEl=document.getElementById('dash-gastos-cuentas');
+  if(gastCuentasEl){
     const gastRows=Object.entries(gastPorCuenta).sort((a,b)=>b[1]-a[1]);
-    gastDetEl.innerHTML=gastM>0?`
+    gastCuentasEl.innerHTML=gastM>0?`
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
         <span style="font-size:.78rem;font-weight:700;color:var(--text)">Total gastos</span>
         <span style="font-size:1.1rem;font-weight:800;color:var(--red)">${fmt(gastM)}</span>
