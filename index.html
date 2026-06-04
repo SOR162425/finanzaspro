@@ -180,7 +180,7 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
     <button onclick="showTab('graficos',this)">📈 Gráficos</button>
     <button onclick="showTab('revision',this)">✅ Revisión</button>
     <button onclick="showTab('presupuesto',this)">📋 Presupuesto</button>
-    <button onclick="showTab('metas',this)">🎯 Metas</button>
+    <!-- Metas desactivadas temporalmente -->
     <button onclick="showTab('respaldo',this)">💾 Respaldo</button>
   </nav>
 </header>
@@ -196,8 +196,12 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
       <div id="dash-inv-section" class="private-num"></div>
     </div>
     <div class="card">
-      <h2>💸 Gastos mes de facturación actual</h2>
+      <h2>💸 Gastos del mes por cuenta</h2>
       <div id="dash-gastos-fact" class="private-num"></div>
+    </div>
+    <div class="card">
+      <h2>💚 Ingresos del mes por cuenta</h2>
+      <div id="dash-ingresos-det" class="private-num"></div>
     </div>
   </div>
   <div class="card">
@@ -1296,7 +1300,7 @@ function renderTxResumenCuentas(){
   const el=document.getElementById('tx-resumen-cuentas');
   if(!ACCS.length){el.innerHTML=`<div class="empty">Agrega cuentas en la pestaña 🏦 Cuentas</div>`;return;}
   el.innerHTML=ACCS.map(a=>{
-    const txA=TXS.filter(t=>t.fecha.startsWith(mk)&&(t.accId===a.id||t.accDestId===a.id));
+    const txA=TXS.filter(t=>getMesFact(t)===mk&&(t.accId===a.id||t.accDestId===a.id));
     const ing=txA.filter(t=>t.tipo==='ingreso'&&t.accId===a.id).reduce((s,t)=>s+t.monto,0);
     const gast=txA.filter(t=>t.tipo==='gasto'&&t.accId===a.id).reduce((s,t)=>s+t.monto,0);
     const bal=ing-gast;
@@ -1307,7 +1311,7 @@ function renderTxResumenCuentas(){
           ${TIPO_ICONS[a.tipo]} ${a.nombre}
           <span class="badge b-muted">${TIPO_LABELS[a.tipo]||a.tipo}</span>
         </div>
-        <span style="font-size:.78rem;color:var(--text-muted)">${txA.length} movimientos</span>
+        <span style="font-size:.78rem;color:var(--text-muted)">${txA.filter(t=>t.tipo==='ingreso'||t.tipo==='gasto').length} movimientos</span>
       </div>
       <div class="resumen-numbers">
         <div class="rn"><div class="rn-label">Ingresos</div><div class="rn-val c-green">${fmt(ing)}</div></div>
@@ -1535,6 +1539,56 @@ function renderDashboard(){
     </div>
     ${invCatHtml}`
   :`<div class="empty" style="padding:.75rem">Sin inversiones registradas</div>`;
+
+  // ── Gastos por cuenta ────────────────────────────────────────────────────────
+  const gastPorCuenta={};
+  txM.filter(t=>t.tipo==='gasto').forEach(t=>{
+    const acc=accById(t.accId);
+    const key=acc?acc.nombre:'Sin cuenta';
+    gastPorCuenta[key]=(gastPorCuenta[key]||0)+t.monto;
+  });
+  const gastDetEl=document.getElementById('dash-gastos-fact');
+  if(gastDetEl){
+    const gastRows=Object.entries(gastPorCuenta).sort((a,b)=>b[1]-a[1]);
+    gastDetEl.innerHTML=gastM>0?`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+        <span style="font-size:.78rem;font-weight:700;color:var(--text)">Total gastos</span>
+        <span style="font-size:1.1rem;font-weight:800;color:var(--red)">${fmt(gastM)}</span>
+      </div>
+      ${gastRows.map(([nombre,val])=>`
+        <div style="border-bottom:1px solid var(--border-light);padding:.3rem 0">
+          <div style="display:flex;justify-content:space-between;font-size:.78rem">
+            <span style="color:var(--text-muted);font-weight:600">💳 ${nombre}</span>
+            <span style="font-weight:700;color:var(--red)">${fmt(val)}</span>
+          </div>
+        </div>`).join('')}`
+    :`<div class="empty" style="padding:.75rem">Sin gastos este mes</div>`;
+  }
+
+  // ── Ingresos por cuenta ───────────────────────────────────────────────────────
+  const ingrPorCuenta={};
+  txM.filter(t=>t.tipo==='ingreso').forEach(t=>{
+    const acc=accById(t.accId);
+    const key=acc?acc.nombre:'Sin cuenta';
+    ingrPorCuenta[key]=(ingrPorCuenta[key]||0)+t.monto;
+  });
+  const ingrDetEl=document.getElementById('dash-ingresos-det');
+  if(ingrDetEl){
+    const ingrRows=Object.entries(ingrPorCuenta).sort((a,b)=>b[1]-a[1]);
+    ingrDetEl.innerHTML=ingrM>0?`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+        <span style="font-size:.78rem;font-weight:700;color:var(--text)">Total ingresos</span>
+        <span style="font-size:1.1rem;font-weight:800;color:var(--green)">${fmt(ingrM)}</span>
+      </div>
+      ${ingrRows.map(([nombre,val])=>`
+        <div style="border-bottom:1px solid var(--border-light);padding:.3rem 0">
+          <div style="display:flex;justify-content:space-between;font-size:.78rem">
+            <span style="color:var(--text-muted);font-weight:600">🏦 ${nombre}</span>
+            <span style="font-weight:700;color:var(--green)">${fmt(val)}</span>
+          </div>
+        </div>`).join('')}`
+    :`<div class="empty" style="padding:.75rem">Sin ingresos este mes</div>`;
+  }
 
   // Resumen por cuenta en dashboard
   const accResEl=document.getElementById('dash-acc-resumen');
