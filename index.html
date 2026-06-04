@@ -384,7 +384,7 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
           </div>
           <div id="tx-cuota-fields" style="display:none;display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
             <div><label style="font-size:.7rem">Monto total compra</label><input type="number" id="tx-cuota-montototal" placeholder="0" class="input" style="font-size:.82rem" oninput="calcCuota()"/></div>
-            <div><label style="font-size:.7rem">N° de cuotas</label><input type="number" id="tx-cuota-total" placeholder="12" min="2" class="input" style="font-size:.82rem" oninput="calcCuota()"/></div>
+            <div><label style="font-size:.7rem">N° de cuotas</label><input type="number" id="tx-cuota-total" placeholder="12" min="2" class="input no-format" style="font-size:.82rem" oninput="calcCuota()"/></div>
           </div>
           <div id="tx-cuota-calc" style="display:none;font-size:.75rem;color:var(--primary-dark);margin-top:.4rem;font-weight:600;background:var(--primary-pale);padding:.5rem .75rem;border-radius:.5rem"></div>
         </div>
@@ -754,7 +754,7 @@ function getRawValue(input){
   return parseFloat((input.dataset.raw||input.value).replace(/\D/g,''))||0;
 }
 function initMoneyInputs(){
-  document.querySelectorAll('input[type="number"]').forEach(inp=>{
+  document.querySelectorAll('input[type="number"]:not(.no-format)').forEach(inp=>{
     inp.type='text';
     inp.inputMode='numeric';
     inp.addEventListener('input',()=>formatMoneyInput(inp));
@@ -1057,7 +1057,7 @@ function addTx(){
   // Cuotas
   const esCuota=document.getElementById('tx-es-cuota')?.checked&&esCredito;
   const _nInp=document.getElementById('tx-cuota-total');
-  const nCuotas=_nInp?.dataset.raw?parseInt(_nInp.dataset.raw):parseInt((_nInp?.value||'0').replace(/\./g,''))||0;
+  const nCuotas=parseInt(_nInp?.value||'0')||0;
   const _mInp=document.getElementById('tx-cuota-montototal');
   const montoTotalCuota=_mInp?.dataset.raw?parseFloat(_mInp.dataset.raw):parseFloat((_mInp?.value||'0').replace(/\./g,'').replace(',','.'))||0;
 
@@ -1160,10 +1160,7 @@ function calcCuota(){
     ? parseFloat(montoInput.dataset.raw)
     : parseFloat((montoInput?.value||'0').replace(/\./g,'').replace(',','.'));
   const total=isNaN(rawTotal)?0:rawTotal;
-  const rawN=nInput?.dataset.raw
-    ? parseInt(nInput.dataset.raw)
-    : parseInt((nInput?.value||'0').replace(/\./g,''));
-  const n=isNaN(rawN)?0:rawN;
+  const n=parseInt(nInput?.value||'0')||0;
   const calc=document.getElementById('tx-cuota-calc');
   if(!calc) return;
   if(total>0&&n>=2){
