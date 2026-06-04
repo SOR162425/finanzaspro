@@ -1056,8 +1056,10 @@ function addTx(){
 
   // Cuotas
   const esCuota=document.getElementById('tx-es-cuota')?.checked&&esCredito;
-  const nCuotas=parseInt((document.getElementById('tx-cuota-total')?.dataset.raw||document.getElementById('tx-cuota-total')?.value||'0').replace(/\D/g,''))||0;
-  const montoTotalCuota=getRawValue(document.getElementById('tx-cuota-montototal'));
+  const _nInp=document.getElementById('tx-cuota-total');
+  const nCuotas=_nInp?.dataset.raw?parseInt(_nInp.dataset.raw):parseInt((_nInp?.value||'0').replace(/\./g,''))||0;
+  const _mInp=document.getElementById('tx-cuota-montototal');
+  const montoTotalCuota=_mInp?.dataset.raw?parseFloat(_mInp.dataset.raw):parseFloat((_mInp?.value||'0').replace(/\./g,'').replace(',','.'))||0;
 
   if(editingTxId){
     // Modo edición: actualizar transacción existente (sin regenerar cuotas)
@@ -1153,16 +1155,21 @@ function toggleCuotaFields(){
 function calcCuota(){
   const montoInput=document.getElementById('tx-cuota-montototal');
   const nInput=document.getElementById('tx-cuota-total');
-  // Usar getRawValue para leer correctamente valores formateados (2.000.000 → 2000000)
-  const total=getRawValue(montoInput);
-  const n=parseInt((nInput?.dataset.raw||nInput?.value||'0').replace(/\D/g,''))||0;
+  // Leer valor real: dataset.raw si existe, sino limpiar puntos del valor visible
+  const rawTotal=montoInput?.dataset.raw
+    ? parseFloat(montoInput.dataset.raw)
+    : parseFloat((montoInput?.value||'0').replace(/\./g,'').replace(',','.'));
+  const total=isNaN(rawTotal)?0:rawTotal;
+  const rawN=nInput?.dataset.raw
+    ? parseInt(nInput.dataset.raw)
+    : parseInt((nInput?.value||'0').replace(/\./g,''));
+  const n=isNaN(rawN)?0:rawN;
   const calc=document.getElementById('tx-cuota-calc');
   if(!calc) return;
   if(total>0&&n>=2){
     const cuota=Math.round(total/n);
     calc.style.display='block';
     calc.innerHTML=`💳 Se crearán <strong>${n} cuotas</strong> de <strong>${fmt(cuota)}</strong> c/u &nbsp;·&nbsp; Total: ${fmt(total)}`;
-    // Limpiar campo monto principal para que no confunda
     document.getElementById('tx-monto').value='';
     document.getElementById('tx-monto').dataset.raw='';
   } else {
