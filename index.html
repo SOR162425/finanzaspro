@@ -1282,12 +1282,14 @@ function txEfecto(tipo){
 }
 
 function renderTxResumenGeneral(){
+  const el=document.getElementById('tx-resumen-general');
+  if(!el) return;
   const mk=mesKey();
   const txM=TXS.filter(t=>t.fecha.startsWith(mk));
   const ingrM=txM.filter(t=>t.tipo==='ingreso').reduce((s,t)=>s+t.monto,0);
   const gastM=txM.filter(t=>t.tipo==='gasto').reduce((s,t)=>s+t.monto,0);
   const bal=ingrM-gastM;
-  document.getElementById('tx-resumen-general')||{innerHTML:''}.innerHTML=`<div class="g3">
+  el.innerHTML=`<div class="g3">
     <div class="stat"><div class="stat-label">Ingresos mes</div><div class="stat-value c-green">${fmt(ingrM)}</div></div>
     <div class="stat"><div class="stat-label">Gastos mes</div><div class="stat-value c-red">${fmt(gastM)}</div></div>
     <div class="stat"><div class="stat-label">Balance mes</div><div class="stat-value ${bal>=0?'c-orange':'c-red'}">${fmt(bal)}</div></div>
