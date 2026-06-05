@@ -1287,7 +1287,7 @@ function renderTxResumenGeneral(){
   const ingrM=txM.filter(t=>t.tipo==='ingreso').reduce((s,t)=>s+t.monto,0);
   const gastM=txM.filter(t=>t.tipo==='gasto').reduce((s,t)=>s+t.monto,0);
   const bal=ingrM-gastM;
-  document.getElementById('tx-resumen-general-dummy').innerHTML=`<div class="g3">
+  document.getElementById('tx-resumen-general')||{innerHTML:''}.innerHTML=`<div class="g3">
     <div class="stat"><div class="stat-label">Ingresos mes</div><div class="stat-value c-green">${fmt(ingrM)}</div></div>
     <div class="stat"><div class="stat-label">Gastos mes</div><div class="stat-value c-red">${fmt(gastM)}</div></div>
     <div class="stat"><div class="stat-label">Balance mes</div><div class="stat-value ${bal>=0?'c-orange':'c-red'}">${fmt(bal)}</div></div>
@@ -1296,9 +1296,8 @@ function renderTxResumenGeneral(){
 
 function renderTxResumenCuentas(){
   const el=document.getElementById('tx-resumen-cuentas');
-  if(!el) return; // elemento eliminado
+  if(!el) return;
   const mk=mesKey();
-  const el=document.getElementById('tx-resumen-cuentas');
   if(!ACCS.length){el.innerHTML=`<div class="empty">Agrega cuentas en la pestaña 🏦 Cuentas</div>`;return;}
   el.innerHTML=ACCS.map(a=>{
     const txA=TXS.filter(t=>getMesFact(t)===mk&&(t.accId===a.id||t.accDestId===a.id));
