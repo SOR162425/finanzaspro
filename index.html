@@ -2806,6 +2806,7 @@ function renderRevision(){
   if(elEst&&fEst) elEst.value=fEst;
 
   let txs=[...TXS].filter(t=>t.tipo==='gasto'||t.tipo==='ingreso'||t.tipo.startsWith('inversion_'));
+  if(fOrg) txs=txs.filter(t=>t.org===fOrg);
   if(fMes) txs=txs.filter(t=>getMesFact(t)===fMes);
   if(fAcc) txs=txs.filter(t=>String(t.accId)===String(fAcc));
   if(fCat) txs=txs.filter(t=>t.cat===fCat);
