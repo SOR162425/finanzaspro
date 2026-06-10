@@ -552,6 +552,12 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
     <h2 style="margin-bottom:.75rem">Filtros</h2>
     <div class="g4" style="align-items:end">
       <div>
+        <label>Organización</label>
+        <select id="rev-org" onchange="renderRevision()">
+          <option value="">Todas</option>
+        </select>
+      </div>
+      <div>
         <label>Mes de facturación</label>
         <select id="rev-mes" onchange="renderRevision()">
           <option value="">Todos</option>
@@ -2730,6 +2736,11 @@ function clearRevDesc(hiddenId, inputId){
 }
 
 function initRevisionFiltros(){
+  // Organizaciones
+  const orgs=[...new Set(TXS.map(t=>t.org).filter(Boolean))].sort();
+  const revOrg=document.getElementById('rev-org');
+  if(revOrg){const prev=revOrg.value;revOrg.innerHTML='<option value="">Todas</option>'+orgs.map(o=>`<option value="${o}"${o===prev?' selected':''}>${o}</option>`).join('');}
+
   // Meses disponibles
   const meses=[...new Set(TXS.map(t=>getMesFact(t)))].filter(Boolean).sort().reverse();
   const revMes=document.getElementById('rev-mes');
@@ -2784,6 +2795,7 @@ function saveRevEdit(id){
 
 function renderRevision(){
   // Guardar valores ANTES de reconstruir
+  const fOrg  = document.getElementById('rev-org')?.value||'';
   const fMes  = document.getElementById('rev-mes')?.value||'';
   const fAcc  = document.getElementById('rev-acc')?.value||'';
   const fCat  = document.getElementById('rev-cat')?.value||'';
