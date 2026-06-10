@@ -407,7 +407,12 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;flex-wrap:wrap;gap:.5rem">
       <span class="section-title" id="tx-list-title">Historial</span>
-      <div class="filter-bar" id="tx-filter-bar"></div>
+      <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+        <select id="tx-filter-org" onchange="renderTxList()" style="font-size:.78rem;padding:.25rem .55rem;border-radius:.5rem;border:1.5px solid var(--border);background:var(--card);color:var(--text)">
+          <option value="">Todas las org.</option>
+        </select>
+        <div class="filter-bar" id="tx-filter-bar"></div>
+      </div>
     </div>
     <div class="tx-list" id="tx-list"></div>
   </div>
@@ -1326,12 +1331,22 @@ function renderTxResumenCuentas(){
 
 function renderTxList(){
   const el=document.getElementById('tx-list');
-  let vis=TXS;
-  if(txFilter==='ingreso') vis=TXS.filter(t=>t.tipo==='ingreso');
-  else if(txFilter==='gasto') vis=TXS.filter(t=>t.tipo==='gasto');
+
+  // Poblar y leer select de org
+  const orgSel=document.getElementById('tx-filter-org');
+  if(orgSel){
+    const orgs=[...new Set(TXS.map(t=>t.org).filter(Boolean))].sort();
+    const prevOrg=orgSel.value;
+    orgSel.innerHTML='<option value="">Todas las org.</option>'+orgs.map(o=>`<option value="${o}"${o===prevOrg?' selected':''}>${o}</option>`).join('');
+  }
+  const fOrg=orgSel?.value||'';
+  let vis=fOrg?TXS.filter(t=>t.org===fOrg):TXS;
+
+  if(txFilter==='ingreso') vis=vis.filter(t=>t.tipo==='ingreso');
+  else if(txFilter==='gasto') vis=vis.filter(t=>t.tipo==='gasto');
   else if(txFilter.startsWith('acc_')){
     const id=parseInt(txFilter.replace('acc_',''));
-    vis=TXS.filter(t=>t.accId===id||t.accDestId===id);
+    vis=vis.filter(t=>t.accId===id||t.accDestId===id);
   }
   document.getElementById('tx-list-title').textContent=`Historial (${vis.length})`;
   if(!vis.length){el.innerHTML=`<div class="empty">Sin transacciones</div>`;return;}
