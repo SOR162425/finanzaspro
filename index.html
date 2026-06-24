@@ -2,6 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>FinanzasPro 🍊</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -24,16 +27,17 @@
   --text-muted:#a0612a;
   --green:#16a34a;--green-bg:#dcfce7;
   --red:#dc2626;--red-bg:#fee2e2;
-  --shadow:0 1px 4px rgba(234,88,12,.1);
+  --shadow:0 2px 12px rgba(234,88,12,.08),0 1px 3px rgba(0,0,0,.04);
+  --shadow-lg:0 8px 32px rgba(234,88,12,.12),0 2px 8px rgba(0,0,0,.06);
 }
-body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);min-height:100vh}
+body{background:var(--bg);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 /* Header */
-header{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+header{background:rgba(255,255,255,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border-light);position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(234,88,12,.07)}
 .header-top{max-width:980px;margin:0 auto;padding:.7rem 1rem;display:flex;align-items:center;justify-content:space-between}
 .logo{display:flex;align-items:center;gap:.5rem;font-size:1.15rem;font-weight:800;color:var(--primary)}
 .mes-label{font-size:.78rem;color:var(--text-muted);font-weight:500}
 nav{max-width:980px;margin:0 auto;padding:0 1rem;display:flex;gap:0;overflow-x:auto}
-nav button{display:flex;align-items:center;gap:.35rem;padding:.55rem 1rem;font-size:.8rem;font-weight:600;background:none;border:none;border-bottom:2.5px solid transparent;cursor:pointer;white-space:nowrap;color:var(--text-muted);transition:all .15s}
+nav button{display:flex;align-items:center;gap:.35rem;padding:.55rem 1rem;font-size:.8rem;font-weight:600;background:none;border:none;border-bottom:2.5px solid transparent;cursor:pointer;white-space:nowrap;color:var(--text-muted);transition:all .15s;transition:all .15s}
 nav button.active{border-bottom-color:var(--primary);color:var(--primary)}
 nav button:hover:not(.active){color:var(--text)}
 /* Layout */
@@ -43,7 +47,7 @@ main{max-width:980px;margin:0 auto;padding:1.4rem 1rem}
 .privacy-mode main{filter:blur(8px);user-select:none;transition:filter .3s;pointer-events:none}
 .privacy-mode header{filter:none!important;pointer-events:auto!important}
 /* Cards */
-.card{background:var(--surface);border-radius:1rem;border:1px solid var(--border-light);padding:1.2rem;box-shadow:var(--shadow);margin-bottom:.9rem}
+.card{background:var(--surface);border-radius:1.15rem;border:1px solid var(--border-light);padding:1.2rem;box-shadow:0 2px 12px rgba(234,88,12,.07),0 1px 3px rgba(0,0,0,.04);margin-bottom:.9rem}
 .card h2{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.9rem}
 /* Grids */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
@@ -52,19 +56,19 @@ main{max-width:980px;margin:0 auto;padding:1.4rem 1rem}
 @media(max-width:700px){.g4{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
 .span2{grid-column:span 2}@media(max-width:700px){.span2{grid-column:span 1}}
 /* Stat cards */
-.stat{background:var(--surface);border-radius:1rem;border:1px solid var(--border-light);padding:1rem 1.1rem;box-shadow:var(--shadow)}
+.stat{background:linear-gradient(135deg,var(--primary-pale) 0%,#fff 100%);border-radius:.95rem;border:1px solid var(--border-light);padding:1rem 1.1rem;box-shadow:0 1px 4px rgba(234,88,12,.06)}
 .stat-label{font-size:.63rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:.28rem;font-weight:600}
-.stat-value{font-size:1.3rem;font-weight:800}
+.stat-value{font-size:1.3rem;font-weight:800;letter-spacing:-.025em}
 .stat-sub{font-size:.68rem;color:var(--text-muted);margin-top:.18rem}
 /* Colors */
 .c-green{color:var(--green)}.c-red{color:var(--red)}.c-orange{color:var(--primary)}.c-dark{color:var(--primary-dark)}.c-mid{color:var(--text-mid)}
 /* Forms */
 label{font-size:.73rem;color:var(--text-muted);display:block;margin-bottom:.22rem;font-weight:600}
-input,select,textarea{border:1.5px solid var(--border);border-radius:.55rem;padding:.42rem .7rem;font-size:.84rem;width:100%;outline:none;background:var(--surface);transition:border-color .15s;color:var(--text)}
-input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(234,88,12,.12)}
+input,select,textarea{border:1.5px solid var(--border);border-radius:.55rem;padding:.42rem .7rem;font-size:.84rem;width:100%;outline:none;background:var(--surface);transition:border-color .15s;color:var(--text);transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(234,88,12,.1)}
 /* Buttons */
 .btn{padding:.46rem 1.05rem;border-radius:.55rem;font-size:.83rem;font-weight:700;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:.3rem}
-.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
+.btn-primary{background:linear-gradient(135deg,#fb923c,#c2410c);color:#fff;box-shadow:0 2px 8px rgba(234,88,12,.28)}.btn-primary:hover{background:linear-gradient(135deg,#ea580c,#9a3412);box-shadow:0 4px 14px rgba(234,88,12,.4);transform:translateY(-1px)}
 .btn-secondary{background:var(--primary-pale);color:var(--primary-dark);border:1.5px solid var(--border)}.btn-secondary:hover{background:var(--border);color:var(--primary-dark)}
 .btn-ghost{background:none;color:var(--text-muted);border:1.5px solid var(--border)}.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
 .btn-danger{background:#fee2e2;color:#b91c1c}.btn-danger:hover{background:#fca5a5}
@@ -208,9 +212,14 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
       <div id="dash-inv-section" class="private-num"></div>
     </div>
     <div class="card">
-      <h2>💸 Gastos del mes por cuenta</h2>
+      <h2>💸 Gastos del mes por categoría</h2>
       <div id="dash-gastos-fact" class="private-num"></div>
     </div>
+  </div>
+  <!-- Fila 3: Gastos por organización -->
+  <div class="card" style="margin-bottom:.9rem">
+    <h2>🏢 Gastos del mes por organización</h2>
+    <div id="dash-gastos-org" class="private-num"></div>
   </div>
   <div class="card">
     <h2>Resumen por cuenta este mes</h2>
@@ -1608,6 +1617,33 @@ function renderDashboard(){
           </div>
         </div>`).join('')}`
     :`<div class="empty" style="padding:.75rem">Sin ingresos este mes</div>`;
+  }
+
+  // ── Gastos por organización ───────────────────────────────────────────────────
+  const gastOrgEl=document.getElementById('dash-gastos-org');
+  if(gastOrgEl){
+    const orgAcc={};
+    txM.filter(t=>t.tipo==='gasto').forEach(t=>{
+      const key=t.org||'Sin org';
+      orgAcc[key]=(orgAcc[key]||0)+t.monto;
+    });
+    const orgRows=Object.entries(orgAcc).sort((a,b)=>b[1]-a[1]);
+    const totalOrg=orgRows.reduce((s,[,v])=>s+v,0);
+    const orgColors={'Personal':'#ea580c','P&A Consulting':'#7c3aed','P&A Supply':'#0ea5e9'};
+    gastOrgEl.innerHTML=orgRows.length?`
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-bottom:.75rem">
+        ${orgRows.map(([org,val])=>`
+          <div style="background:linear-gradient(135deg,var(--primary-pale),#fff);border-radius:.85rem;padding:.85rem 1rem;border:1px solid var(--border-light)">
+            <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:.3rem">${org}</div>
+            <div style="font-size:1.25rem;font-weight:800;color:${orgColors[org]||'var(--primary)'};letter-spacing:-.02em">${fmt(val)}</div>
+            <div style="font-size:.7rem;color:var(--text-muted);margin-top:.2rem">${totalOrg>0?Math.round(val/totalOrg*100):0}% del total</div>
+          </div>`).join('')}
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:.5rem .75rem;background:var(--primary-pale);border-radius:.6rem;font-size:.8rem">
+        <span style="font-weight:600;color:var(--text-muted)">Total gastos</span>
+        <span style="font-weight:800;color:var(--red)">${fmt(totalOrg)}</span>
+      </div>`
+    :`<div class="empty">Sin gastos este mes</div>`;
   }
 
   // Resumen por cuenta en dashboard
