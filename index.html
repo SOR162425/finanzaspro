@@ -30,6 +30,27 @@
   --shadow:0 2px 12px rgba(234,88,12,.08),0 1px 3px rgba(0,0,0,.04);
   --shadow-lg:0 8px 32px rgba(234,88,12,.12),0 2px 8px rgba(0,0,0,.06);
 }
+body.dark{
+  --bg:#0f0a06;
+  --surface:#1a1008;
+  --border:#3d2010;
+  --border-light:#2d1608;
+  --primary:#fb923c;
+  --primary-dark:#ea580c;
+  --primary-light:#1a0e05;
+  --primary-mid:#f97316;
+  --primary-pale:#1f1008;
+  --text:#fef3e2;
+  --text-mid:#fcd9a8;
+  --text-muted:#c97a3a;
+  --green:#22c55e;
+  --red:#f87171;
+  --shadow:0 2px 12px rgba(0,0,0,.4),0 1px 3px rgba(0,0,0,.3);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.5);
+}
+body.dark header{background:rgba(15,10,6,.85)}
+body.dark .stat{background:linear-gradient(135deg,var(--primary-pale) 0%,var(--surface) 100%)}
+body.dark input,body.dark select,body.dark textarea{background:var(--surface);color:var(--text)}
 body{background:var(--bg);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 /* Header */
 header{background:rgba(255,255,255,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border-light);position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(234,88,12,.07)}
@@ -46,6 +67,48 @@ main{max-width:980px;margin:0 auto;padding:1.4rem 1rem}
 /* Privacidad */
 .privacy-mode main{filter:blur(8px);user-select:none;transition:filter .3s;pointer-events:none}
 .privacy-mode header{filter:none!important;pointer-events:auto!important}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--border-light);border-radius:99px}
+::-webkit-scrollbar-thumb{background:var(--primary-mid);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:var(--primary)}
+
+/* Animaciones */
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.tab.active{animation:fadeIn .2s ease}
+.card{animation:fadeIn .18s ease}
+
+/* Cards hover */
+.card{transition:box-shadow .2s,transform .2s}
+.card:hover{box-shadow:0 6px 24px rgba(234,88,12,.12),0 2px 6px rgba(0,0,0,.06)}
+
+/* Badges de organización con colores */
+.badge-org{display:inline-flex;align-items:center;padding:.1rem .55rem;border-radius:99px;font-size:.65rem;font-weight:700;letter-spacing:.03em}
+.badge-org.personal{background:#fff7ed;color:#ea580c;border:1px solid #fed7aa}
+.badge-org.consulting{background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe}
+.badge-org.supply{background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe}
+.badge-org.default{background:var(--primary-pale);color:var(--primary);border:1px solid var(--border)}
+
+/* TX colores por tipo */
+.tx-row{border-radius:.7rem;padding:.2rem .4rem;transition:background .12s}
+.tx-row:hover{background:linear-gradient(90deg,var(--primary-pale),transparent)}
+.tx-row-ingreso .tx-amount{color:var(--green)!important}
+.tx-row-gasto .tx-amount{color:var(--red)!important}
+.tx-row-inversion .tx-amount{color:#7c3aed!important}
+
+/* Empty state */
+.empty{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:2rem 1rem;color:var(--text-muted);font-size:.85rem}
+.empty::before{content:"📭";font-size:2rem}
+
+/* Btn hover elevación */
+.btn{transition:all .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+
+/* Toggle dark mode */
+#btn-dark{background:none;border:1.5px solid var(--border);border-radius:99px;padding:.22rem .65rem;cursor:pointer;font-size:.82rem;color:var(--text-muted);transition:all .15s}
+#btn-dark:hover{border-color:var(--primary);color:var(--primary)}
 /* Cards */
 .card{background:var(--surface);border-radius:1.15rem;border:1px solid var(--border-light);padding:1.2rem;box-shadow:0 2px 12px rgba(234,88,12,.07),0 1px 3px rgba(0,0,0,.04);margin-bottom:.9rem}
 .card h2{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.9rem}
@@ -167,7 +230,8 @@ hr{border:none;border-top:1px solid var(--border-light);margin:.75rem 0}
   <div class="header-top">
     <div class="logo">🍊 FinanzasPro</div>
     <div style="display:flex;align-items:center;gap:.75rem">
-      <button id="btn-privacy" onclick="togglePrivacy()" title="Ocultar/mostrar montos" style="background:none;border:1.5px solid var(--border);border-radius:9999px;padding:.22rem .65rem;cursor:pointer;font-size:.82rem;color:var(--text-light)">👁️</button>
+      <button id="btn-dark" onclick="toggleDark()" title="Modo oscuro">🌙</button>
+      <button id="btn-privacy" onclick="togglePrivacy()" title="Ocultar/mostrar montos" style="background:none;border:1.5px solid var(--border);border-radius:9999px;padding:.22rem .65rem;cursor:pointer;font-size:.82rem;color:var(--text-muted)">👁️</button>
       <span class="mes-label" id="mes-label"></span>
       <div id="user-chip" style="display:none;align-items:center;gap:.5rem;background:var(--primary-pale);border:1.5px solid var(--border);border-radius:9999px;padding:.25rem .75rem .25rem .35rem;cursor:pointer" onclick="confirmLogout()">
         <img id="user-photo" src="" width="24" height="24" style="border-radius:50%;display:none"/>
@@ -824,6 +888,20 @@ function showSync(on){
 }
 
 let privacyOn=false;
+let darkOn=false;
+function toggleDark(){
+  darkOn=!darkOn;
+  document.body.classList.toggle('dark',darkOn);
+  document.getElementById('btn-dark').textContent=darkOn?'☀️':'🌙';
+  localStorage.setItem('finpro-dark',darkOn?'1':'0');
+}
+// Restaurar dark mode al cargar
+(function(){
+  if(localStorage.getItem('finpro-dark')==='1'){
+    darkOn=true;
+    document.body.classList.add('dark');
+  }
+})();
 function togglePrivacy(){
   privacyOn=!privacyOn;
   document.body.classList.toggle('privacy-mode',privacyOn);
@@ -1376,13 +1454,13 @@ function renderTxList(){
     const sub=t.tipo==='transferencia'
       ? `${acc?acc.nombre:'?'} → ${accDest?accDest.nombre:'?'}`
       : [t.cat, acc?acc.nombre:'', t.fecha].filter(Boolean).join(' · ');
-    return `<div class="tx-row">
+    return `<div class="tx-row tx-row-${t.tipo}">
       <div class="tx-info">
         <div class="tx-icon-wrap" style="background:${color}20;color:${color}">${txIcon(t.tipo)}</div>
         <div>
           <div style="display:flex;align-items:center;gap:.4rem">
             <div class="tx-name">${t.desc||t.cat}</div>
-            ${t.org&&t.org!=='Personal'?`<span style="font-size:.6rem;font-weight:700;padding:.08rem .4rem;border-radius:9999px;background:${(ORG_COLORS[t.org]||{light:'#f3f4f6'}).light};color:${(ORG_COLORS[t.org]||{dark:'#374151'}).dark}">${t.org}</span>`:''}
+            ${t.org&&t.org!=='Personal'?`<span class="badge-org ${t.org==='P&A Consulting'?'consulting':t.org==='P&A Supply'?'supply':'default'}">${t.org}</span>`:''}
           </div>
           <div class="tx-sub">${sub}</div>
           ${t.desc2?`<div class="tx-sub" style="color:var(--primary-dark);font-style:italic">📝 ${t.desc2}</div>`:''}
@@ -2913,7 +2991,7 @@ function renderRevision(){
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
             <span style="font-size:.83rem;font-weight:600;color:var(--text)">${t.desc||t.cat}</span>
-            ${t.org&&t.org!=='Personal'?`<span style="font-size:.6rem;font-weight:700;padding:.08rem .4rem;border-radius:9999px;background:${(ORG_COLORS[t.org]||{light:'#f3f4f6'}).light};color:${(ORG_COLORS[t.org]||{dark:'#374151'}).dark}">${t.org}</span>`:''}
+            ${t.org&&t.org!=='Personal'?`<span class="badge-org ${t.org==='P&A Consulting'?'consulting':t.org==='P&A Supply'?'supply':'default'}">${t.org}</span>`:''}
             ${revisado?'<span style="font-size:.65rem;font-weight:700;color:var(--green);background:#dcfce7;padding:.08rem .4rem;border-radius:9999px">✅ En cartola</span>':''}
           </div>
           <div style="font-size:.68rem;color:var(--text-muted);margin-top:.1rem">
